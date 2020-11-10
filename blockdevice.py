@@ -90,9 +90,9 @@ def blockPut(Blocks, BlockSize, BlockIndex, BlockData):
     return ""
 
 # ============================================================
-# blockDelete(Blocks, BlockSize, BlockIndex)
+# blockDrop(Blocks, BlockSize, BlockIndex)
 # ============================================================
-def blockDelete(Blocks, BlockSize, BlockIndex):
+def blockDrop(Blocks, BlockSize, BlockIndex):
     """Deletes Blocks...  Delete part of CRUD..."""
     """Validate parameters..."""
     Success = type(Blocks) == str\
