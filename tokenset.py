@@ -69,7 +69,7 @@ class TokenSet:
             Delimiter = tokenGet(Fields,";","Delimiter=")
             if len(Delimiter) > 0:
                 Flags = tokenFlags(tokenGet(Fields,";","Flags="))
-                self.data = tokenDrop(This, Delimiter, TokenID, Flags)
+                self.data = tokenDrop(Data, Delimiter, TokenID, Flags)
                 return True
         return False
 
