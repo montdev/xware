@@ -878,7 +878,7 @@ def tokenFlagGet(Flags, Property, ReturnType = "bool"):
     return Value
 
 # ============================================================
-# tokenFlagSet(Flags = 0, Property, Value = 1)
+# tokenFlagSet(Flags, Property, Value = 1)
 # ============================================================
 def tokenFlagSet(Flags, Property, Value = 1):
     """Query the Flags for the Given Property Bit..."""
