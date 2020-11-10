@@ -578,7 +578,6 @@ def tokenOrder(Set, Delimiter, Flags = 0):
     
     if Success:
         """Initialize Local Variables..."""
-        NewSet = ""
         Count = tokenCount(Set, Delimiter)
         Order = ""
 
@@ -588,6 +587,8 @@ def tokenOrder(Set, Delimiter, Flags = 0):
             Order = "REVERSE"
 
         if len(Order) > 0:
+            """Define a NewSet for the Ordered Set..."""
+            NewSet = ""
             
             """Perform the Reorder Operation..."""
             for Index in range(0, Count):
