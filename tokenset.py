@@ -474,6 +474,10 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
               and len(Delimiter) > 0 and TokenID in (int, str) \
               and type(NewValue) == str and type(Flags) == int
 
+    if Success and type(TokenID) == int:
+        """Make sure it's a Positive Integer..."""
+        Success = TokenID >= 0
+    
     if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
         Success = len(NewValue) > 0
     
