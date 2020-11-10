@@ -644,11 +644,14 @@ def tokenFind(Set, Delimiter, Key, Flags = 0):
             if CaseSensitive == False:
                 Token = Token.upper()
 
-            if ContainedIn and Token.Find(Key) < 0:
-                return 0
-            
-            if Key == Token[:KeyLength]:
-                return Index + 1
+            """If ContainedIn is in play then it can be anywhere..."""
+            if ContainedIn:
+                if Token.Find(Key) >= 0:
+                    return Index + 1
+            else:
+                """If ContainedIn isn't in play then it's the Key at the Front..."""
+                if Key == Token[:KeyLength]:
+                    return Index + 1
 
     """Default Return..."""
     return 0
