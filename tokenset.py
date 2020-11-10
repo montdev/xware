@@ -417,13 +417,12 @@ def tokenDrop(Set, Delimiter, TokenID, Flags = 0):
 
             """With a Keyed Delete there may be more than 1..."""
             if Token > 0 and tokenFlagGet(Flags, "ALL_MATCHES"):
-                NewSet = Set
                     
                 while Token > 0:
-                    NewSet = tokenDrop(NewSet, Delimiter, Token)
-                    Token = tokenFind(NewSet, Delimiter, TokenID, Flags)
+                    Set = tokenDrop(Set, Delimiter, Token)
+                    Token = tokenFind(Set, Delimiter, TokenID, Flags)
                     
-                return NewSet
+                return Set
         else:
             Token = TokenID
         
