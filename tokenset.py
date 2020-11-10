@@ -369,8 +369,9 @@ def tokenPut(Set, Delimiter, TokenID, Value, Flags = 0):
         
         elif Token == 1:
             """Update the first token..."""
-            if Count == 1:
+            if Count in (0,1):
                 """This is the only token in the set..."""
+                """It should put it though if count is 0 or 1..."""
                 return TokenValue
             else:
                 Tail = Set.find(Delimiter)
