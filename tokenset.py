@@ -75,7 +75,7 @@ class TokenSet:
 
     def InsertToken(self, TokenID, Token):
         # Insert a Token...
-        if tokenIdValid(TokenID) and type(Token) == str:
+        if TokenID in (int, str) and type(Token) == str:
             Data = self.data
             Fields = self.fields
             Delimiter = tokenGet(Fields,";","Delimiter=")
