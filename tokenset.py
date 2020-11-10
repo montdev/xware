@@ -469,7 +469,7 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
     """ Insert is really nothing more than a Get and a Put..."""
     """Validate parameters..."""
     Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
+              and len(Delimiter) > 0 and TokenID in (int, str) \
               and type(NewValue) == str and type(Flags) == int
 
     if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
