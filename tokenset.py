@@ -880,7 +880,7 @@ def tokenFlagGet(Flags, Property, ReturnType = "bool"):
 # ============================================================
 # tokenFlagSet(Flags = 0, Property, Value = 1)
 # ============================================================
-def tokenFlagSet(Flags = 0, Property, Value = 1):
+def tokenFlagSet(Flags, Property, Value = 1):
     """Query the Flags for the Given Property Bit..."""
 
     """Validate the parameters..."""
