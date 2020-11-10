@@ -487,23 +487,26 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
             if tokenFind(Set, Delimiter, NewValue, Flags) > 0:
                 """Return the Unchanged Set..."""
                 return Set
-
+            
+        """Sort is implemented in the Insert Function..."""
+        Sorted = tokenFlagGet(Flags, "SORTED")
+            
         """Check to see if this is a Key or Index Operation..."""        
         if type(TokenID) == str:
             """This is a Keyed or Named TokenSet..."""
+            """Convert Token Key to Index..."""
             Token = tokenFind(Set, Delimiter, TokenID, Flags)
             NewToken = NewValue
-            """ The Zero Index is the SORTED or NULL Index..."""
-            Sorted = Token == 0 and tokenFlagGet(Flags, "SORTED")
 
         else:
             Token = TokenID
             NewToken = NewValue
-            Sorted = Token == 0
+            """ The Zero Index is the SORTED or NULL Index..."""
+            Sorted = Sorted or Token == 0
         
         if Sorted:
             """ This is a Special Sorted Insert..."""
-
+            
             Count = tokenCount(Set, Delimiter)
             InsertHere = False
             Descending = tokenFlagGet(Flags,"DESCENDING")
