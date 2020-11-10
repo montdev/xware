@@ -29,9 +29,9 @@ def blockCount(Blocks, BlockSize):
     return BlockCount
 
 # ============================================================
-# blockAdd(Blocks, BlockSize, BlockData)
+# blockAdd(Blocks, BlockSize, NewBlock, Flags)
 # ============================================================
-def blockAdd(Blocks, BlockSize, BlockData):
+def blockAdd(Blocks, BlockSize, NewBlock = "", Flags = 0):
     """Add a new Datablock to the set..."""
     """Create part of CRUD..."""
 
