@@ -1,0 +1,1076 @@
+# coding: ascii
+# *************************************************************
+# TokenSet.py
+# *************************************************************
+print(__name__)
+#import math
+#import datetime
+#import time
+#import imp
+
+# ************************************************************
+# TokenSet Class...
+# ************************************************************
+class TokenSet:
+    def __init__(self, data="", fields=""):
+        # Initialize the TokenSet...
+        self.data = data
+        self.fields = fields
+        
+    # TokenSet Functions...
+    def TokenCount(self):
+        # Get the Token Count...
+        Data = self.data
+        Delimiter = tokenGet(self.fields, ";", "Delimiter=")
+        if len(Delimiter) > 0:
+            return tokenCount(Data, Delimiter)
+        return 0
+
+    def AddToken(self, Token = ""):
+        # Add a Token to the Dataset...
+        if type(Token) == str:
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields,";","Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields,";","Flags="))
+                self.data = tokenAdd(Data, Delimiter, Token, Flags)
+                return True
+        return False
+
+    def GetToken(self, TokenID):
+        # Get a Token from the TokenSet...
+        if tokenIdValid(TokenID):
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields,";","Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields,";","Flags="))
+                return tokenGet(Data, Delimiter, TokenID, Flags)
+        return ""
+
+    def PutToken(self, TokenID, Value):
+        # Update a given Token Value...
+        if tokenIdValid(TokenID) and type(Value) == str:
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields, ";", "Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields,";","Flags="))
+                self.data = tokenPut(Data, Delimiter, TokenID, Value, Flags)
+                return True
+        return False
+
+    def DropToken(self, TokenID):
+        # Drop a given Token...
+        if tokenIdValid(TokenID):
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields,";","Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields,";","Flags="))
+                self.data = tokenDrop(This, Delimiter, TokenID, Flags)
+                return True
+        return False
+
+    def InsertToken(self, TokenID, Token):
+        # Insert a Token...
+        if tokenIdValid(TokenID) and type(Token) == str:
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields,";","Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields,";","Flags="))
+                self.data = tokenInsert(Data, Delimiter, TokenID, Token, Flags)
+                return True
+        return False
+
+    def FindToken(self, Key):
+        # Convert a Key to an Index...
+        if tokenIdValid(Key, str):
+            Data = self.data
+            Fields = self.fields
+            Delimiter = tokenGet(Fields,";","Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields, ";", "Flags="))
+                return tokenFind(Data, Delimiter, Key, Flags)
+        return 0
+
+    def IsToken(self, Key):
+        # Check for the presence of a Key...
+        return bool(self.FindToken(Key))
+        
+    # FieldSet Functions...
+
+    def GetField(self, Field):
+        # Get a Field Value from the Property Bag...
+        if tokenIdValid(Field, str):
+            Field = Field + "="
+            return tokenGet(self.fields, ";", Field)
+        return ""
+
+    def PutField(self, Field, Value):
+        # Update a Field Value...
+        if tokenIdValid(Field, str) and type(Value) == str:
+            Field = Field + "="
+            self.fields = tokenPut(self.fields, ";", Field, Value)
+
+            """Check if this Field has any Impact..."""            
+            if Field.upper() == "DELIMITER=":
+                Delimiter = tokenGet(self.Fields, ";", Field)
+                if bool(Delimiter) and Delimiter != Value:
+                    self.data = tokenDelimiter(self.data, Delimiter, Value)
+            return True
+        return False
+
+    # FlagSet Functions...
+
+    def GetFlag(self, Flag):
+        # Get a Flag Value
+        if tokenIdValid(Flag, str):
+            Fields = self.fields
+            Flags = tokenGet(Fields, ";", "Flags=")
+            return tokenFlagGet(Flags, Flag)
+        return False
+
+    def SetFlag(self, Flag, Value):
+        # Set a Flag Value...
+        if tokenIdValid(Flag, str) and type(Value) in (int, bool):
+            Fields = self.fields
+            Delimiter = tokenGet(Fields, ";", "Delimiter=")
+            if len(Delimiter) > 0:
+                Flags = tokenFlags(tokenGet(Fields, ";", "Flags="))
+                Flags = tokenFlagSet(Flags, Flag, Value)
+                self.fields = tokenPut(Fields, ";", "Flags=", Flags)
+                if Flag.upper() in ("SORTED", "DESCENDING", "REVERSE"):
+                    self.data = tokenOrder(self.data, Delimiter, Flags)
+                return True
+        return False
+
+# ************************************************************
+# End of TokenSet Class...
+# ************************************************************
+
+
+# ============================================================
+# ************************************************************
+# TokenSet Functions...
+# ************************************************************
+# ============================================================
+
+# ============================================================
+# tokenCount(Set, Delimiter, Key = "")
+# ============================================================
+def tokenCount(Set, Delimiter, Key = "", Flags = 0):
+    """Count the number of tokens in a TokenSet..."""
+    """Initialize Local Variables..."""
+    Count = 0
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 
+    
+    if Success:
+        if len(Set) > 0:
+            if type(Key) == str and len(Key) > 0:
+                """This is a Filtered Key Count..."""
+                Filter = tokenFilter(Set, Delimiter, Key, Flags)
+                Count = tokenCount(Filter, Delimiter)
+            else:
+                """The count is always count + 1..."""
+                Count = Set.count(Delimiter) + 1
+                
+    return Count
+
+# ============================================================
+# tokenAdd(Set, Delimiter, Token, Flags=0)
+# Create part of CRUD...  Append Token to a TokenSet...
+# ============================================================
+def tokenAdd(Set, Delimiter, Token, Flags=0):
+    """ Append a Token to the End of the Set"""
+    """ This is the Create Part of CRUD..."""
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and type(Token) == str \
+              and type(Flags) == int
+
+    """Test for NO_NULL_TOKENS..."""
+    if Success and tokenFlagGet(Flags, "NO_NULL_TOKENS"):
+        """Test the Token to see that it isn't NULL..."""
+        Success = len(Token) > 0
+            
+    if Success:
+        
+        if len(Set) == 0:
+            """ This will be the first token in the set... """
+            if len(Token) == 0:
+                return " "
+            return Token
+        else:
+            """Test for UNIQUE..."""
+            if tokenFlagGet(Flags, "UNIQUE"):
+                """Test the Token to see that it is Unique..."""
+                if tokenFind(Set, Delimiter, Token, Flags) > 0:
+                    """Token Exists, Return the Unchanged Set..."""
+                    return Set
+            
+            if tokenFlagGet(Flags, "SORTED"):
+                """ Insert in a Sorted Fashion (index=0)... """
+                return tokenInsert(Set, Delimiter, 0, Token, Flags)
+            elif tokenFlagGet(Flags, "REVERSE"):
+                """Prepend to the beginning of the TokenSet..."""
+                return Token + Delimiter + Set
+            else:
+                """ This will be a normal Append Operation... """
+                return Set + Delimiter + Token
+            
+    """Default Return the Set unchanged..."""
+    return Set
+
+# ============================================================
+# tokenGet(Set, Delimiter, TokenID, Flags)
+#
+# Extract the desired Token Value...
+# This is the READ part of CRUD...
+#
+# Support has been added for Named or Keyed Set Lookups...
+# If Keyed Lookup then the Value will have the Key removed...
+# ============================================================
+def tokenGet(Set, Delimiter, TokenID, Flags = 0):
+    """Extract the indicated Token"""
+    """First we need to know how many Tokens there are..."""
+    
+    """This has also been extended to support Named Sets...
+       If Keyed, the Key will be removed fromm the Value...
+       Theoretically we could have a Flag that is used to
+       Force the Creation of a Key...
+    """
+    
+    """Initialize Local Variables"""
+    Token = Count = Start = Length = KeyLength = 0
+    Key = Value = ""
+
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
+              and type(Flags) == int
+    
+    if Success:
+        """Get the Count..."""
+        Count = tokenCount(Set, Delimiter)
+
+        """Check to see if a Keyed Lookup is needed..."""
+        if type(TokenID) == str:
+            """Do a Key to Index lookup..."""
+            """Convert the Key to an Index..."""
+            Key = TokenID
+            KeyLength = len(Key)
+            Token = tokenFind(Set, Delimiter, Key, Flags)
+            
+        else:
+            """This is a Normal Token Index..."""
+            Token = TokenID
+
+        """Extract the Token Value..."""
+        if Count == 0 or Token == 0 or Token > Count:
+            """Can't retrieve what isn't there..."""
+            return ""
+        
+        elif Token == 1:
+            """Extract the First Token..."""
+            if Count == 1:
+                """This is the Only Token..."""
+                Value = Set
+            else:
+                """Locate the first Delimiter"""
+                Length = Set.find(Delimiter)
+                Value = Set[:Length]
+                
+        elif Token == Count:
+            """Extract the Last Token..."""
+            Start = Set.rindex(Delimiter) + len(Delimiter)
+            Value = Set[Start:]
+            
+        else:
+            """This is a Middle Token..."""
+            Start = tokenAt(Set, Delimiter, Token - 2) + len(Delimiter)
+            Length = Set.find(Delimiter, Start + 1)
+            Value = Set[Start:Length]
+
+        """If this was a Keyed Lookup, strip out the Key..."""
+        if KeyLength > 0:
+            """Return the Value without the Key..."""
+            Value = Value[KeyLength:]
+            
+    return Value
+
+# ============================================================
+# tokenPut(Set, Delimiter, TokenID, Token)
+#
+# Update portion of CRUD...
+#
+# Support has been added for Named or Keyed TokenSets...
+# ============================================================
+def tokenPut(Set, Delimiter, TokenID, Value, Flags = 0):
+    """Update the Indicated Token..."""
+
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
+              and type(Value) == str and type(Flags) == int
+
+    AllowNulls = True
+
+    """Test for NullNess on the Token..."""
+    if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
+        AllowNulls = False
+        Success = len(Value) > 0
+
+    if Success:
+        """Initialize Local Variables..."""
+        Token = Head = Tail = 0
+        TokenValue = ""
+        Count = tokenCount(Set, Delimiter)
+
+        """Check to see if Key to Index lookup is needed..."""
+        if type(TokenID) == str:
+                
+            """Do a Key to Index lookup..."""
+            Token = tokenFind(Set, Delimiter, TokenID, Flags)
+            TokenValue = TokenID + Value
+                
+        else:
+            """This is a normal Token Index..."""
+            Token = TokenID
+            TokenValue = Value
+
+        """Check Flags for Unique Requirement..."""
+        if tokenFlagGet(Flags,"UNIQUE"):
+            if tokenFind(Set, Delimiter, TokenValue, Flags) > 0:
+                """Token already exists..."""
+                """Return the Unchanged Set..."""
+                return Set
+            
+        """Check to see if this is a Sorted Set..."""
+        """However if the Token is Slotted, Sorted won't count..."""
+        if Token == 0 and tokenFlagGet(Flags, "SORTED"):
+            """This is a Sorted Set with an Unslotted Token"""
+
+            """Do a Sorted Insert..."""
+            return tokenInsert(Set, Delimiter, Token, TokenValue, Flags)
+        
+        elif Token == 0:
+            """Just append the Value to the End..."""
+            return tokenAdd(Set, Delimiter, TokenValue, Flags)
+            
+        elif Token > Count and AllowNulls:
+            """The set will have to be expanded to accomodate..."""
+            
+            return Set + (Delimiter * ((Token - 1) - Count)) + TokenValue
+        
+        elif Token == 1:
+            """Update the first token..."""
+            if Count == 1:
+                """This is the only token in the set..."""
+                return TokenValue
+            else:
+                Tail = Set.find(Delimiter)
+                return TokenValue + Set[Tail:]
+            
+        elif Token == Count:
+            """Update the last token..."""
+            Head = Set.rindex(Delimiter) + len(Delimiter)
+            return Set[:Head] + TokenValue
+        
+        else:
+            """Update a middle token..."""
+            Head = tokenAt(Set, Delimiter, Token - 2) + len(Delimiter)
+            Tail = Set.find(Delimiter, Head + 1)
+            return Set[:Head] + TokenValue + Set[Tail:]
+        
+    """Default Return, Unchanged Set..."""
+    return Set
+
+# ============================================================
+# tokenDrop(Set, Delimiter, TokenID, Flags = 0)
+#
+# Delete portion of CRUD...
+#
+# Support has been added for Named or Keyed Sets...
+# ============================================================
+def tokenDrop(Set, Delimiter, TokenID, Flags = 0):
+    """Remove the Indicated Token"""
+    """Validate parameters..."""
+    
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
+              and type(Flags) == int
+    
+    if Success:
+        
+        """Initialize Local Variables..."""
+        Token = Head = Tail = 0
+        
+        if type(TokenID) == str:
+            """Perform a Key to ID Lookup..."""
+            Token = tokenFind(Set, Delimiter, TokenID, Flags)
+
+            """With a Keyed Delete there may be more than 1..."""
+            if Token > 0 and tokenFlagGet(Flags, "ALL_MATCHES"):
+                NewSet = Set
+                    
+                while Token > 0:
+                    NewSet = tokenDrop(NewSet, Delimiter, Token)
+                    Token = tokenFind(NewSet, Delimiter, TokenID, Flags)
+                    
+                return NewSet
+        else:
+            Token = TokenID
+        
+        """Determine the Count..."""
+        Count = tokenCount(Set, Delimiter)
+        
+        """Delete the indicated Token..."""
+        if Count == 0 or Token == 0 or Token > Count:
+            """Can't delete what isn't there..."""
+            return Set
+        
+        elif Token == 1:
+            """Remove the First Token..."""
+            if Count == 1:
+                """This is the only token, nothing else remains..."""
+                return ""
+            else:
+                Tail = Set.find(Delimiter) + len(Delimiter)
+                return Set[Tail:]
+            
+        elif Token == Count:
+            """Removing the Last Token..."""
+            Tail = Set.rindex(Delimiter)
+            return Set[:Tail]
+        
+        else:
+            """Removing a Middle Token..."""
+            Head = tokenAt(Set, Delimiter, Token - 2)
+            Tail = Set.find(Delimiter, Head + 1)
+            return Set[:Head] + Set[Tail:]
+        
+    """Default Return the Unchanged Set..."""
+    return Set
+
+# ============================================================
+# tokenInsert(Set, Delimiter, TokenID, NewValue, Flags)
+#
+# For Sorted Sets use 0 for the Index Slot...
+# Support has been added for Keyed or Named TokenSets...
+# ============================================================
+def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
+    """Insert a Token to a given slot...  Also provides a
+       simple means to perform a sorted insert..."""
+    """ Insert is really nothing more than a Get and a Put..."""
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
+              and type(NewValue) == str and type(Flags) == int
+
+    if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
+        Success = len(NewValue) > 0
+    
+    if Success:
+
+        """Initialize Local Variables..."""
+        Token = 0
+        NewToken = TokenValue = ""
+        Sorted = False
+
+        """Check Flags for Unique Requirement..."""
+        if tokenFlagGet(Flags, "UNIQUE"):
+            if tokenFind(Set, Delimiter, NewValue, Flags) > 0:
+                """Return the Unchanged Set..."""
+                return Set
+
+        """Check to see if this is a Key or Index Operation..."""        
+        if type(TokenID) == str:
+            """This is a Keyed or Named TokenSet..."""
+            Token = tokenFind(Set, Delimiter, TokenID, Flags)
+            NewToken = NewValue
+            """ The Zero Index is the SORTED or NULL Index..."""
+            Sorted = Token == 0 and tokenFlagGet(Flags, "SORTED")
+
+        else:
+            Token = TokenID
+            NewToken = NewValue
+            Sorted = Token == 0
+        
+        if Sorted:
+            """ This is a Special Sorted Insert..."""
+
+            Count = tokenCount(Set, Delimiter)
+            InsertHere = False
+            Descending = tokenFlagGet(Flags,"DESCENDING")
+
+            for Item in range(0, Count):
+
+                """Get the Token for Testing..."""
+                TokenValue = tokenGet(Set, Delimiter, Item + 1)
+                
+                if Descending:
+                    """This is a Descending Sort..."""
+                    """Insert After and Put..."""
+                    if TokenValue < NewToken:
+                        """This is the one we're looking for..."""
+                        InsertHere = True
+                        break
+                else:
+                    """This is an Ascending Sort..."""
+                    """Insert Before and Put..."""
+
+                    if TokenValue > NewToken:
+                        """This is the one we're looking for..."""
+                        InsertHere = True
+                        break
+
+            if InsertHere:
+                """So prepare the Insertion Token and Put it in..."""
+                TokenValue = NewToken + Delimiter + TokenValue
+                return tokenPut(Set, Delimiter, Item + 1, TokenValue)
+                
+            else:
+                """No Match after a full traversal, just Append..."""
+                return tokenAdd(Set, Delimiter, NewToken)
+        
+        else:
+            """ Normal Positional Insert"""
+            if Token == 0:
+                """This may be due to a Named Token Not Found..."""
+                """Clearly the SORTED Flag isn't set..."""
+                """The Index 0 rule can be affected by this..."""
+                """This is also part of why the Flags are in play..."""
+                """Make it so the new token will be Inserted at 1..."""
+                Token = 1
+
+            """Insert before the indicated slot..."""
+            TokenValue = tokenGet(Set, Delimiter, Token)
+            TokenValue = NewToken + Delimiter + TokenValue
+            return tokenPut(Set, Delimiter, Token, TokenValue)
+        
+    """Default Return the Unchanged Set..."""
+    return Set
+
+# ============================================================
+# tokenOrder(Set, Delimiter, Flags = 0)
+#
+# Sort or reverse the order of a TokenSet...
+# ============================================================
+def tokenOrder(Set, Delimiter, Flags = 0):
+    """Sort the current Set..."""
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and type(Flags) == int
+    
+    if Success:
+        """Initialize Local Variables..."""
+        NewSet = ""
+        Count = tokenCount(Set, Delimiter)
+        Order = ""
+
+        if tokenFlagGet(Flags, "SORTED"):
+            Order = "SORTED"
+        elif tokenFlagGet(Flags, "REVERSE"):
+            Order = "REVERSE"
+
+        if len(Order) > 0:
+            
+            """Perform the Reorder Operation..."""
+            for Index in range(0, Count):
+                
+                """Extract the Token..."""
+                Token = tokenGet(Set, Delimiter, Index + 1)
+                
+                if Order == "SORTED":
+                    """ Loop through the Tokens and copy to a SortedSet..."""
+                    NewSet = tokenInsert(NewSet, Delimiter, 0, Token, Flags)
+
+                elif Order == "REVERSE":
+                    """ Loop through Tokens and copy to Reversed Set..."""
+                    NewSet = tokenAdd(NewSet, Delimiter, Token, Flags)
+
+            """Return the Resulting Set..."""
+            return NewSet
+
+    """Default Return the unchanged Set..."""
+    return Set
+
+# ============================================================
+# tokenFind(Set, Delimiter, Key, Flags = 0)
+#
+# Find the Key at the Beginning of a Token...
+#
+# First step in inplementing Named Token Sets...
+# ============================================================
+def tokenFind(Set, Delimiter, Key, Flags = 0):
+    """Locate the Token that begins with String..."""
+    """Validate parameters..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+             and len(Delimiter) > 0 and tokenIdValid(Key, str) \
+             and type(Flags) == int
+    
+    if Success:
+        """Check for Flags Affecting this Operation..."""
+        ContainedIn = tokenFlagGet(Flags, "CONTAINED_IN")
+        CaseSensitive = tokenFlagGet(Flags, "CASE_SENSITIVE")
+        if CaseSensitive == False:
+            Key = Key.upper()
+        
+        Count = tokenCount(Set, Delimiter)
+        
+        KeyLength = len(Key)
+
+        """Find First Match for Key..."""
+        for Index in range(0, Count):
+            """ Check to see if this is the Token..."""
+            Token = tokenGet(Set, Delimiter, Index + 1)
+            
+            """Compare Key with the Token..."""
+            if CaseSensitive == False:
+                Token = Token.upper()
+
+            if ContainedIn and Token.Find(Key) < 0:
+                return 0
+            
+            if Key == Token[:KeyLength]:
+                return Index + 1
+
+    """Default Return..."""
+    return 0
+
+# ============================================================
+# tokenFilter(Set, Delimiter, Key, Flags = 0)
+# ============================================================
+def tokenFilter(Set, Delimiter, Key, Flags = 0):
+    """Return a Key Filtered Subset..."""
+
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and tokenIdValid(Key, str) \
+              and type(Flags) == int
+
+    Filter = ""
+    
+    if Success:
+
+        """Check for Flags that affect this Operation..."""
+        ContainedIn = tokenFlagGet(Flags, "CONTAINED_IN")
+        CaseSensitive = tokenFlagGet(Flags, "CASE_SENSITIVE")
+        
+        if CaseSensitive == False:
+            Key = Key.upper()
+            
+        KeyLength = len(Key)
+
+        Count = tokenCount(Set, Delimiter)
+
+        for Index in range(0, Count):
+            """ Check to see if this is the Token..."""
+            Token = tokenGet(Set, Delimiter, Index + 1)
+            
+            """Compare Key with the Token..."""
+            
+            if CaseSensitive:
+                TokenTest = Token
+            else:
+                TokenTest = Token.upper()
+
+            Match = False
+            
+            if ContainedIn:
+                if TokenTest.Find(Key) >= 0:
+                    Match = True
+            else:
+                if Key == TokenTest[:KeyLength]:
+                    Match = True
+                
+            if Match:
+                """Add the unmodified Token..."""
+                Filter = tokenAdd(Filter, Delimiter, Token, Flags)
+
+
+    return Filter
+
+# ============================================================
+# tokenIsKey(Set, Delimiter, Key, Flags = 0)
+# ============================================================
+def tokenIsKey(Set, Delimiter, Key, Flags = 0):
+    """Test to see if a Key Value can be found..."""
+    Token = tokenFind(Set, Delimiter, Key, Flags)
+    return bool(Token)
+
+# ============================================================
+# tokenSetCount(Set, Delimiter, Size)
+# Change the Size of a TokenSet...
+# ============================================================
+def tokenSetCount(Set, Delimiter, Size, Flags=0):
+    """Change the Size of the TokenSet..."""
+    Success = type(Set) == str and type(Delimiter) == str \
+              and len(Delimiter) > 0 and type(Size) == int
+
+    if Success:
+        
+        """Initialize Local Variables..."""
+        Count = tokenCount(Set, Delimiter)
+
+        """Prevent Operations resulting in Null Tokens..."""        
+        NoNulls = tokenFlagGet(Flags, "NO_NULL_TOKENS")
+
+        if Size == 0:
+            """Clear it to none..."""
+            return ""
+        elif Size == 1 and Count == 0:
+            """Make sure it's 1 even if none..."""
+            if NoNulls:
+                return ""
+            else:
+                return " "
+        elif Size == 1:
+            """We're only going to have the first one left..."""
+            return tokenGet(Set, Delimiter, 1)
+        elif Count > Size:
+            """Reduce the Size..."""
+            return Set[:tokenAt(Set, Delimiter, Size - 1)]
+        elif Count < Size:
+            """Increase the Size..."""
+            if NoNulls:
+                return Set
+            return tokenPut(Set, Delimiter, Size, "")
+
+    return ""
+
+# ============================================================
+# tokenDelimiter(Set, OldDelimiter, NewDelimiter)
+# ============================================================
+def tokenDelimiter(Set, OldDelimiter, NewDelimiter):
+    """Change the delimiter..."""
+
+    Success = type(Set) == str and type(OldDelimiter) == str \
+              and type(NewDelimiter) == str
+
+    if Success:
+        return Set.replace(OldDelimiter, NewDelimiter)
+
+    return ""
+
+# ============================================================
+# Abstract Data Type Inspired Methods...
+# ************************************************************
+# (LISP Type List Functions, Stack, Queue)
+# ============================================================
+
+# ============================================================
+# tokenHead(Set, Delimiter)
+# Return only the first Token in the Set...
+# ============================================================
+def tokenHead(Set, Delimiter):
+    """Return only the First Token in the Set..."""
+    return tokenGet(Set, Delimiter, 1)
+
+# ============================================================
+# tokenTail(Set, Delimiter)
+# Return all but the first Token in the Set...
+# ============================================================
+def tokenTail(Set, Delimiter):
+    """Return all but the First Token in the Set..."""
+    return tokenDrop(Set, Delimiter, 1)
+
+# ============================================================
+# tokenPush(Set, Delimiter, Token):
+# Push Token onto Top of Stack...
+# ============================================================
+def tokenPush(Set, Delimiter, Token):
+    """Push Token onto Top of Stack..."""
+    return tokenInsert(Set, Delimiter, 1, Token)
+
+# ============================================================
+# tokenPop(Set, Delimiter, Flags):
+# Pop Token off of Top of Stack...
+# ============================================================
+def tokenPop(Set, Delimiter):
+    """Pop Token off of Top of Stack..."""
+    return tokenDrop(Set, Delimiter, 1)
+
+# ============================================================
+# tokenEnqueue(Set, Delimiter, Flags):
+# Add Token to End of Queue...
+# ============================================================
+def tokenEnqueue(Set, Delimiter, Token):
+    """Add Token to End of Queue..."""
+    return tokenAdd(Set, Delimiter, Token)
+
+# ============================================================
+# tokenDequeue(Set, Delimiter, Flags):
+# Pop Token off of Top of Stack...
+# ============================================================
+def tokenDequeue(Set, Delimiter):
+    """Add Token to End of Queue..."""
+    return tokenDrop(Set, Delimiter, 1)
+
+
+# ============================================================
+# ************************************************************
+# TokenSet Flag Functions...
+# ************************************************************
+# ============================================================
+# ============================================================
+# tokenFlagGet(Flags, Property, ReturnType)
+# ============================================================
+
+def tokenFlagGet(Flags, Property, ReturnType = "bool"):
+    """Query the Flags for the Given Property Bit..."""
+
+    Value = 0
+
+    """Validate the parameters..."""
+    if type(Flags) == int and tokenIdValid(Property):
+
+        """Make this a Non Case Sensitive Search..."""
+        Property = Property.upper()
+        
+        if Property == "SORTED":
+            Value = (Flags & (2**0))
+            
+        elif Property == "DESCENDING":
+            Value = (Flags & (2**1))
+
+        elif Property == "REVERSE":
+            Value = (Flags & (2**2))
+
+        elif Property == "ALL_MATCHES":
+            Value = (Flags & (2**3))
+        
+        elif Property == "UNIQUE":
+            Value = (Flags & (2**4))
+        
+        elif Property == "NO_NULL_TOKENS":
+            Value = (Flags & (2**5))
+        
+        elif Property == "CASE_SENSITIVE":
+            Value = (Flags & (2**6))
+        
+        elif Property == "CONTAINED_IN":
+            Value = (Flags & (2**7))
+           
+        """Determine the desired return type..."""
+        """If the Return Type is overridden the default is int..."""
+        if ReturnType.lower() == "bool":
+            """This is the default..."""
+            Value = bool(Value)
+
+    return Value
+
+# ============================================================
+# tokenFlagSet(Flags = 0, Property, Enabled = True)
+# ============================================================
+def tokenFlagSet(Flags = 0, Property = "", Value = 1):
+    """Query the Flags for the Given Property Bit..."""
+
+    """Validate the parameters..."""
+    if type(Flags) == int and type(Value) in (int, bool) \
+       and tokenIdValid(Property):
+
+        """Make this a Non Case Sensitive Search..."""
+        Property = Property.upper()
+
+        """We either set it with an Or or we can use
+        the Exclusive Or as a toggle if it's not
+        already set..."""
+
+        if Property == "SORTED":
+            if Value > 0:
+                Flags = (Flags | (2**0))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**0))
+                
+        elif Property == "DESCENDING":
+            if Value > 0:
+                Flags = (Flags | (2**1))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**1))
+            
+        elif Property == "REVERSE":
+            if Value > 0:
+                Flags = (Flags | (2**2))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**2))
+           
+        elif Property == "ALL_MATCHES":
+            if Value > 0:
+                Flags = (Flags | (2**3))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**3))
+        
+        elif Property == "UNIQUE":
+            if Value > 0:
+                Flags = (Flags | (2**4))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**4))
+        
+        elif Property == "NO_NULL_TOKENS":
+            if Value > 0:
+                Flags = (Flags | (2**5))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**5))
+        
+        elif Property == "CASE_SENSITIVE":
+            if Value > 0:
+                Flags = (Flags | (2**6))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**6))
+
+        elif Property == "CONTAINED_IN":
+            if Value > 0:
+                Flags = (Flags | (2**7))
+            elif tokenFlagGet(Flags, Property):
+                Flags = (Flags ^ (2**7))
+           
+    return Flags
+
+# ============================================================
+# ************************************************************
+# Helper Functions...
+# ************************************************************
+# ============================================================
+
+# ============================================================
+# tokenAt(Str, Sub, Nth=0)
+#
+# Helper wrapper function...
+# ============================================================
+def tokenAt(Str, Sub, Nth=0):
+    """Determine the Position of the Desired Occurrence..."""
+    Success = type(Str) == str \
+              and type(Sub) == str \
+              and type(Nth) == int
+    if Success:
+        """Initialize Local Variables..."""
+        Offset = Str.find(Sub)
+        if Offset > 0:
+            """Loop through each instance till we find it..."""
+            for Instance in range(Nth):
+                Offset = Str.find(Sub, Offset+1)
+        return Offset
+    """Default Return..."""
+    return -1
+
+# ============================================================
+# tokenIsTrue(Value)
+# ============================================================
+def tokenIsTrue(Value):
+    return bool(Value) == True
+
+# ============================================================
+# tokenIsFalse(Value)
+# ============================================================
+def tokenIsFalse(Value):
+    return bool(Value) == False
+
+# ============================================================
+# tokenFlags(Flags)
+# Helper function to take a string based Flags value and then
+# convert it into a useful integer...
+# ============================================================
+def tokenFlags(Flags):
+    if type(Flags) == str and Flags.isdigit():
+        return int(Flags)
+    elif type(Flags) == int:
+        return Flags
+    """Default to return an empty Flag Set..."""
+    return 0
+
+# ============================================================
+# tokenIdValid(Flags)
+# ============================================================
+def tokenIdValid(TokenID, Type=(int, str)):
+    if bool(TokenID) and str(TokenID).isprintable():
+        if type(Type) == tuple:
+            return type(TokenID) in Type
+        elif type(Type) == type:
+            return type(TokenID) == Type
+
+    return False
+
+# ============================================================
+# tokenIsQuoted
+# ============================================================
+def tokenIsQuoted(Token, Head = "", Tail = ""):
+    """Determine if the Token is Quoted..."""
+    Quoted = False
+    
+    if len(Head) > 0 and len(Tail) == 0:
+        Length = len(Head)
+        if Token[:Length] ==  Token[(Length*-1):]:
+            Quoted = True
+    elif len(Head) > 0 and len(Tail) > 0:
+        Length1 = len(Head)
+        Length2 = len(Tail)
+        if Token[:Length1] ==  Head and Token[Length2*-1:] == Tail:
+            Quoted = True
+    else:
+        # Head Quotes are ',",[,{,(,<
+        Head = Token[:1]
+        Tail = Token[-1:]
+        
+        if Head == "(" and Tail == ")":
+            Quoted = True
+        elif Head == "[" and Tail == "]":
+            Quoted = True
+        elif Head == "{" and Tail == "}":
+            Quoted = True
+        elif Head == "<" and Tail == ">":
+            Quoted = True
+        elif Head == Tail and Head.isprintable() \
+             and Head.isalnum() == False:
+            Quoted = True
+        
+    return Quoted
+
+# ============================================================
+# tokenQuoteHead
+# ============================================================
+def tokenQuoteHead(Token):
+    return Token[:1]
+
+# ============================================================
+# tokenQuoteTail
+# ============================================================
+def tokenQuoteTail(Token):
+    return Token[-1:]
+
+# ============================================================
+# tokenQuote
+# ============================================================
+def tokenQuote(Token, Head = "", Tail = ""):
+    if len(Head) == 0:
+        return "'" + Token + "'"
+    if len(Head) > 0 and len(Tail) == 0:
+        """Use the Head for both ends..."""
+        return Head + Token + Head
+    else:
+        return Head + Token + Tail
+
+# ============================================================
+# tokenUnquote
+# ============================================================
+def tokenUnquote(Token):
+    if tokenIsQuoted(Token):
+        while tokenIsQuoted(Token):
+            Length = len(Token) - 1
+            Token = Token[1:Length]
+
+    return Token
+
+# =============================================================
+# Autocall the main() function...
+# =============================================================
+def main():
+
+    pass
+
+if __name__ == "__main__":
+    main()
