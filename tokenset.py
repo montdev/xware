@@ -351,15 +351,17 @@ def tokenPut(Set, Delimiter, TokenID, Value, Flags = 0):
                 return Set
             
         """Check to see if this is a Sorted Set..."""
-        """However if the Token is Slotted, Sorted won't count..."""
-        if Token == 0 and tokenFlagGet(Flags, "SORTED"):
-            """This is a Sorted Set with an Unslotted Token"""
-
-            """Do a Sorted Insert..."""
-            return tokenInsert(Set, Delimiter, Token, TokenValue, Flags)
-        
+        Sorted = tokenFlagGet(Flags, "SORTED")
+        if Sorted and (type(TokenID) == int or Token == 0):
+            """If Key based and not Slotted it should be inserted anyway
+               but if it's Index based it won't be sorted after
+               changing it so it should be dropped and inserted..."""
+            if Token > 0:
+                Set = tokenDrop(Set, Delimiter, Token)
+            return tokenInsert(Set, Delimiter, 0, TokenValue, Flags)
+            
         elif Token == 0:
-            """Just append the Value to the End..."""
+            """Just append the Unslotted Value to the End..."""
             return tokenAdd(Set, Delimiter, TokenValue, Flags)
             
         elif Token > Count and AllowNulls:
