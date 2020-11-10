@@ -144,7 +144,96 @@ def blockSplit(Blocks, BlockSize, Delimiter):
     return ""
 
 # *************************************************************
-# Helper Functions...
+# Field16 Field Set Functions...
+# *************************************************************
+def field16Count(Data):
+    """Return a Count of Field Structures..."""
+    if type(Data) == str:
+        return len(Data)/16
+    return 0
+    
+def field16Add(Data, FieldID, Size = None, Flags = None):
+    """Add a base Field16 Structure to the Field Set..."""
+    if type(Data) == str and type(Field) == str \
+       and len(Field) > 0 and Field.isprintable() \
+       and  type(Size) == int and Size > 0 \
+       and type(Flags) == int and Flags >= 0:
+        if type(Size) == None and Type(Flags) == None:
+           """Validate Field as a Field Structure..."""
+           if field16Validate(Field):
+               pass
+           
+
+    """Return the Unchanged Set..."""
+    return Data
+
+def field16Get(Data, FieldID, Property = None):
+    """Get a Field16 Structure from the Set..."""
+    pass
+
+def field16Put(Data, FieldID, Property = None):
+    """Put or Replace a Field16 Structure in the Set..."""
+    pass
+
+def field16Drop(Data, FieldID):
+    """Remove a Field16 Structure from the Set..."""
+    pass
+
+def field16Insert(Data, InsertPoint, Field):
+    """Insert a Field Structure at this point..."""
+    pass
+
+def field16Find(Data, Key):
+    """Find a Field16 based on Name..."""
+    pass
+
+def field16CalcOffset(Data):
+    pass
+
+# =============================================
+# Field16 - Field Specific Functions...
+# =============================================
+
+def field16New(Name, Size, Flags = 0):
+    """Create a base Field16 Structure..."""
+    if type(Name) == str and len(Name) > 0 \
+       and type(Size) == int and Size > 0:
+        Field = blockPad(Name, 10, " ") \
+                + str(0).rjust(2,"0") \
+                + str(Size).rjust(2,"0") \
+                + str(Flags).rjust(2,"0")
+
+        return Field
+
+    """Return an Empty Structure..."""
+    return ""
+
+def field16Property(Data, Prop, Value=None):
+    pass
+
+def field16IsValid(Field):
+    """Validate a Field16 Structure..."""
+    if type(Field) == str and len(Field) == 16 \
+       and Field[:10].isprintable() \
+       and Field[10:12].isdigit() \
+       and Field[12:14].isdigit() \
+       and Field[14:16].isdigit():
+        return True
+
+    return False
+
+# =============================================
+# Field16 - Flag Functions...
+# =============================================
+def field16FlagGet(Flags, Name, ReturnType="bool"):
+    pass
+
+def field16FlagSet(Flags, Name, Value):
+    pass
+
+
+# *************************************************************
+# Helper Sniffer Functions...
 # *************************************************************
 
 # =============================================================
