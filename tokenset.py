@@ -159,7 +159,7 @@ class TokenSet:
 # ============================================================
 
 # ============================================================
-# tokenCount(Set, Delimiter, Key = "")
+# tokenCount(Set, Delimiter, Key = "", Flags = 0)
 # ============================================================
 def tokenCount(Set, Delimiter, Key = "", Flags = 0):
     """Count the number of tokens in a TokenSet..."""
@@ -227,7 +227,7 @@ def tokenAdd(Set, Delimiter, Token, Flags=0):
     return Set
 
 # ============================================================
-# tokenGet(Set, Delimiter, TokenID, Flags)
+# tokenGet(Set, Delimiter, TokenID, Flags = 0)
 #
 # Extract the desired Token Value...
 # This is the READ part of CRUD...
@@ -304,7 +304,7 @@ def tokenGet(Set, Delimiter, TokenID, Flags = 0):
     return Value
 
 # ============================================================
-# tokenPut(Set, Delimiter, TokenID, Token)
+# tokenPut(Set, Delimiter, TokenID, Value, Flags = 0)
 #
 # Update portion of CRUD...
 #
@@ -458,7 +458,7 @@ def tokenDrop(Set, Delimiter, TokenID, Flags = 0):
     return Set
 
 # ============================================================
-# tokenInsert(Set, Delimiter, TokenID, NewValue, Flags)
+# tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0)
 #
 # For Sorted Sets use 0 for the Index Slot...
 # Support has been added for Keyed or Named TokenSets...
@@ -704,10 +704,10 @@ def tokenIsKey(Set, Delimiter, Key, Flags = 0):
     return bool(Token)
 
 # ============================================================
-# tokenSetCount(Set, Delimiter, Size)
+# tokenSetCount(Set, Delimiter, Size, Flags = 0)
 # Change the Size of a TokenSet...
 # ============================================================
-def tokenSetCount(Set, Delimiter, Size, Flags=0):
+def tokenSetCount(Set, Delimiter, Size, Flags = 0):
     """Change the Size of the TokenSet..."""
     Success = type(Set) == str and type(Delimiter) == str \
               and len(Delimiter) > 0 and type(Size) == int
@@ -788,7 +788,7 @@ def tokenPush(Set, Delimiter, Token):
     return tokenInsert(Set, Delimiter, 1, Token)
 
 # ============================================================
-# tokenPop(Set, Delimiter, Flags):
+# tokenPop(Set, Delimiter):
 # Pop Token off of Top of Stack...
 # ============================================================
 def tokenPop(Set, Delimiter):
@@ -796,7 +796,7 @@ def tokenPop(Set, Delimiter):
     return tokenDrop(Set, Delimiter, 1)
 
 # ============================================================
-# tokenEnqueue(Set, Delimiter, Flags):
+# tokenEnqueue(Set, Delimiter, Token):
 # Add Token to End of Queue...
 # ============================================================
 def tokenEnqueue(Set, Delimiter, Token):
@@ -804,7 +804,7 @@ def tokenEnqueue(Set, Delimiter, Token):
     return tokenAdd(Set, Delimiter, Token)
 
 # ============================================================
-# tokenDequeue(Set, Delimiter, Flags):
+# tokenDequeue(Set, Delimiter):
 # Pop Token off of Top of Stack...
 # ============================================================
 def tokenDequeue(Set, Delimiter):
@@ -818,7 +818,7 @@ def tokenDequeue(Set, Delimiter):
 # ************************************************************
 # ============================================================
 # ============================================================
-# tokenFlagGet(Flags, Property, ReturnType)
+# tokenFlagGet(Flags, Property, ReturnType = "bool")
 # ============================================================
 
 def tokenFlagGet(Flags, Property, ReturnType = "bool"):
@@ -865,9 +865,9 @@ def tokenFlagGet(Flags, Property, ReturnType = "bool"):
     return Value
 
 # ============================================================
-# tokenFlagSet(Flags = 0, Property, Enabled = True)
+# tokenFlagSet(Flags = 0, Property, Value = 1)
 # ============================================================
-def tokenFlagSet(Flags = 0, Property = "", Value = 1):
+def tokenFlagSet(Flags = 0, Property, Value = 1):
     """Query the Flags for the Given Property Bit..."""
 
     """Validate the parameters..."""
@@ -984,7 +984,7 @@ def tokenFlags(Flags):
     return 0
 
 # ============================================================
-# tokenIdValid(Flags)
+# tokenIdValid(TokenID, Type = (int, str))
 # ============================================================
 def tokenIdValid(TokenID, Type=(int, str)):
     if bool(TokenID) and str(TokenID).isprintable():
@@ -996,7 +996,7 @@ def tokenIdValid(TokenID, Type=(int, str)):
     return False
 
 # ============================================================
-# tokenIsQuoted
+# tokenIsQuoted(Token, Head = "", Tail = "")
 # ============================================================
 def tokenIsQuoted(Token, Head = "", Tail = ""):
     """Determine if the Token is Quoted..."""
@@ -1031,19 +1031,19 @@ def tokenIsQuoted(Token, Head = "", Tail = ""):
     return Quoted
 
 # ============================================================
-# tokenQuoteHead
+# tokenQuoteHead(Token)
 # ============================================================
 def tokenQuoteHead(Token):
     return Token[:1]
 
 # ============================================================
-# tokenQuoteTail
+# tokenQuoteTail(Token)
 # ============================================================
 def tokenQuoteTail(Token):
     return Token[-1:]
 
 # ============================================================
-# tokenQuote
+# tokenQuote(Token, Head = "", Tail = "")
 # ============================================================
 def tokenQuote(Token, Head = "", Tail = ""):
     if len(Head) == 0:
@@ -1055,7 +1055,7 @@ def tokenQuote(Token, Head = "", Tail = ""):
         return Head + Token + Tail
 
 # ============================================================
-# tokenUnquote
+# tokenUnquote(Token)
 # ============================================================
 def tokenUnquote(Token):
     if tokenIsQuoted(Token):
