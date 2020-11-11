@@ -99,8 +99,8 @@ def blockDrop(Blocks, BlockSize, BlockIndex):
     """Deletes Blocks...  Delete part of CRUD..."""
     """Validate parameters..."""
     Success = type(Blocks) == str\
-              and type(BlockSize) == int\
-              and type(BlockIndex) == int
+              and type(BlockSize) == int and BlockSize > 0\
+              and type(BlockIndex) == int and BlockIndex >= 0
     if Success:
         BlockStart = BlockIndex * BlockSize
         BlockEnd = BlockStart + BlockSize
