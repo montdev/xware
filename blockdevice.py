@@ -159,13 +159,34 @@ def blockFind(Blocks, BlockSize, Key):
         
         for BlockID in range(Count):
             Block = blockGet(Blocks, BlockSize, BlockID)
-            if Key == Block[:KeyLength]:
+            if Key == Block[:KeyLength].upper():
                 """We have a match..."""
                 return BlockID
             
     """Return the default, Not Found..."""
     return 0
 
+# ============================================================
+# blockFilter(Blocks, BlockSize, Key)
+# ============================================================
+def blockFilter(Blocks, BlockSize, Key):
+    """Create a filtered set of Key Matches..."""
+    Filter = ""
+    
+    if type(Blocks) == str and type(BlockSize) == int \
+        and BlockSize > 0 and type(Key) == str \
+        and len(Key) > 0:
+        
+        Count = blockCount(Blocks, BlockSize)
+        Key = Key.upper()
+        KeyLength = len(Key)
+        
+        for BlockID in range(Count):
+            Block = blockGet(Blocks, BlockSize, BlockID)
+            if Key == Block[:KeyLength].upper():
+                Filter = blockAdd(Filter, BlockSize, Block)
+                
+    return Filter
 # ============================================================
 # blockPad(Blocks, BlockSize, PadChar)
 # ============================================================
