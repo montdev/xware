@@ -145,6 +145,28 @@ def blockInsert(Blocks, BlockSize, BlockID, NewBlock):
     return Blocks
 
 # ============================================================
+# blockFind(Blocks, BlockSize, Key)
+# ============================================================
+def blockFind(Blocks, BlockSize, Key):
+    """Find a block based on a Key..."""
+    if type(Blocks) == str and type(BlockSize) == int \
+        and BlockSize > 0 and type(Key) == str  \
+        and len(Key) > 0 and Key.isprintable():
+        
+        Key = Key.upper()
+        KeyLength = len(Key)
+        Count = blockCount(Blocks, BlockSize)
+        
+        for BlockID in range(Count):
+            Block = blockGet(Blocks, BlockSize, BlockID)
+            if Key == Block[:KeyLength]:
+                """We have a match..."""
+                return BlockID
+            
+    """Return the default, Not Found..."""
+    return 0
+
+# ============================================================
 # blockPad(Blocks, BlockSize, PadChar)
 # ============================================================
 def blockPad(Blocks, BlockSize, PadChar):
