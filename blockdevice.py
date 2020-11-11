@@ -29,7 +29,7 @@ def blockCount(Blocks, BlockSize):
     return BlockCount
 
 # ============================================================
-# blockAdd(Blocks, BlockSize, NewBlock, Flags)
+# blockAdd(Blocks, BlockSize, BlockData, Flags)
 # ============================================================
 def blockAdd(Blocks, BlockSize, BlockData = "", Flags = 0):
     """Add a new Datablock to the set..."""
@@ -37,7 +37,7 @@ def blockAdd(Blocks, BlockSize, BlockData = "", Flags = 0):
 
     """Validate the parameters..."""
     Success = type(Blocks) == str and type(BlockSize) == int\
-              and type(BlockData) == str
+              and BlockSize > 0 and type(BlockData) == str
 
     if Success:
         """Test to see if this is Binary or Text..."""
@@ -46,9 +46,10 @@ def blockAdd(Blocks, BlockSize, BlockData = "", Flags = 0):
             Padding = chr(0)
         else:
             Padding = " "
-        return Blocks + BlockData.ljust(BlockSize, Padding)
+        """Make sure it's no more than BlockSize And At Least BlockSize..."""
+        return Blocks + BlockData[:BlockSize].ljust(BlockSize, Padding)
     """Default Return"""
-    return ""
+    return Blocks
 
 # ============================================================
 # blockGet(Blocks, BlockSize, BlockIndex)
