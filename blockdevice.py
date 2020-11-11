@@ -311,13 +311,13 @@ def field16Put(Data, FieldID, Property, Value):
                 elif Property in ("OFFSET", "SIZE", "FLAGS"):
                     Success = type(Value) == int \
                                 and Value >= 0
-                    CalcOffsets = Property in ("OFFSET","SIZE")
                         
                 """Update the Field..."""
                 if Success:
                     Field = field16Property(Field, Property, Value)
                     if field16Valid(Field):
                         Data = blockPut(Data, 16, Field)
+                        CalcOffsets = Property in ("OFFSET","SIZE")
                 
             if CalcOffsets:
                 Data = field16CalcOffsets(Data)
