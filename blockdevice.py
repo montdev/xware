@@ -255,7 +255,9 @@ def field16Add(Data, Field, Size = None, Flags = None):
              and type(Flags) == int and Flags >= 0:
             """Create a new field and add that..."""
             Field = field16New(Field, Size, Flags)
-            Data = blockAdd(Data, 16, Field)
+            if field16Valid(Field):
+                Data = blockAdd(Data, 16, Field)
+                
         Data = field16CalcOffsets(Data)
            
     """Return the Unchanged Set..."""
@@ -448,7 +450,7 @@ def field16CalcOffsets(Data):
 def field16New(Name, Size, Flags = 0):
     """Create a base Field16 Structure..."""
     if type(Name) == str and len(Name) > 0 \
-       and Name[:1].isalpha() and Name.isprintable() \
+       and Name[:1].isalpha() and Name.isalnum() \
        and type(Size) == int and Size > 0 \
        and type(Flags) == int and Flags >= 0:
         Field = Name[:10].ljust(10, " ") \
@@ -507,7 +509,7 @@ def field16Property(Data, Prop, Value=None):
 def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
-       and Field[:10].isprintable() \
+       and Field[:10].isalnum() \
        and Field[10:12].isdigit() \
        and Field[12:14].isdigit() \
        and Field[14:16].isdigit():
