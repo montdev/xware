@@ -399,8 +399,9 @@ def field16Insert(Data, FieldID, Field):
         
         if between(Index, 0, Count - 1):
             """Do the Insert here..."""
-            Data = blockInsert(Data, 16, Index, Field)
-            Data = field16CalcOffsets(Data)
+            if field16Valid(Field):
+                Data = blockInsert(Data, 16, Index, Field)
+                Data = field16CalcOffsets(Data)
         
     return Data
 
