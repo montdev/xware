@@ -256,12 +256,21 @@ def field16Add(Data, Field, Size = None, Flags = None):
 
 def field16Get(Data, FieldID, Property = None):
     """Get a Field16 Structure from the Set..."""
-    if type(Data) == str:
+    if type(Data) == str and field16IdValid(FieldID):
         """Get the Count and Validate the FieldID..."""
         Count = blockCount(Data, 16)
         
-        if type(FieldID) == int \
-           and between(FieldID, 0, Count - 1):
+        """FieldID can now be Index or Key..."""
+        if type(FieldID) == str:
+            Field = field16Find(Data, FieldID)
+            Success = True
+        elif type(FieldID) == int and between(FieldID, 0, Count - 1):
+            Field = FieldID
+            Success = True
+        else:
+            Success = False
+        
+        if Success:
             Field = blockGet(Data, 16, FieldID)
             if Property == None:
                 return Field
@@ -275,11 +284,11 @@ def field16Get(Data, FieldID, Property = None):
                     return field16Property(Field, "SIZE")
                 elif Property == "FLAGS":
                     return field16Property(Field, "FLAGS")
-        else:
-            """The return would be expected to be integer.."""
-            if type(Property) == str \
-               and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
-                return -1
+    else:
+        """The return would be expected to be integer.."""
+        if type(Property) == str \
+            and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
+            return -1
     
     """Can't return what isn't there..."""
     return ""
