@@ -287,7 +287,7 @@ def field16Get(Data, FieldID, Property = None):
                 return Field
             else:
                 """Extract the appropriate Field Property..."""
-                if Property.upper() in ("NAME", "OFFSET", "SIZE", "FLAGS")
+                if Property.upper() in ("NAME", "OFFSET", "SIZE", "FLAGS"):
                     return field16Property(Field, Property)
 
     """The return would be expected to be integer..."""
