@@ -421,7 +421,7 @@ def field16Find(Data, Key):
         KeyLength = len(Key)
         for BlockID in range(Count):
             Block = blockGet(Data, 16, BlockID)
-            if Block[:KeyLength].strip(chr(0)).upper() == Key:
+            if Block[:KeyLength].upper() == Key:
                 """We found a match..."""
                 return BlockID
             
