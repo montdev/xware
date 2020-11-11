@@ -509,6 +509,7 @@ def field16Property(Data, Prop, Value=None):
 def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
+       and Field[:1].isalpha() \
        and Field[:10].isalnum() \
        and Field[10:12].isdigit() \
        and Field[12:14].isdigit() \
