@@ -262,19 +262,18 @@ def field16Get(Data, FieldID, Property = None):
         
         """FieldID can now be Index or Key..."""
         if type(FieldID) == str:
+            """Convert the Key to an Index..."""
             Field = field16Find(Data, FieldID)
-            Success = True
-        elif type(FieldID) == int and between(FieldID, 0, Count - 1):
+        elif type(FieldID) == int :
             Field = FieldID
-            Success = True
-        else:
-            Success = False
         
-        if Success:
+        if between(Field, 0, Count - 1):
             Field = blockGet(Data, 16, FieldID)
             if Property == None:
+                """Just return the field itself..."""
                 return Field
             else:
+                """Extract the appropriate Field Property..."""
                 Property = Property.upper()
                 if Property == "NAME":
                     return field16Property(Field, "NAME")
@@ -284,11 +283,11 @@ def field16Get(Data, FieldID, Property = None):
                     return field16Property(Field, "SIZE")
                 elif Property == "FLAGS":
                     return field16Property(Field, "FLAGS")
-    else:
-        """The return would be expected to be integer.."""
-        if type(Property) == str \
-            and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
-            return -1
+
+    """The return would be expected to be integer.."""
+    if type(Property) == str \
+        and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
+        return -1
     
     """Can't return what isn't there..."""
     return ""
@@ -460,7 +459,7 @@ def field16Valid(Field):
 # =============================================
 def field16IdValid(FieldID, Type = (int, str)):
     """Validate a FieldID..."""
-    if bool(FieldID) and str(FieldID).isprintable():
+    if str(FieldID).isprintable() and len(str(FieldID)) > 0:
         if type(Type) == tuple:
             return type(FieldID) in Type
         elif type(Type) == Type:
