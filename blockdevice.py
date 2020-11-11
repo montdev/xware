@@ -277,7 +277,7 @@ def field16Get(Data, FieldID, Property = None):
                 if Property.upper() in ("NAME", "OFFSET", "SIZE", "FLAGS")
                     return field16Property(Field, Property)
 
-    """The return would be expected to be integer.."""
+    """The return would be expected to be integer..."""
     if type(Property) == str \
         and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
         return -1
