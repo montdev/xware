@@ -725,7 +725,90 @@ def between(Value, Min, Max):
         return Value >= Min and Value <= Max
 
     return False
-    
+# =============================================================
+# baseScheme(Base)
+# =============================================================
+def baseScheme(Base):
+    """Define a BaseScheme..."""
+    Success = type(Base) == int
+    if Success:
+        """Initialize Local Variables..."""
+        Scheme = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        Base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+                 "abcdefghijklmnopqrstuvwxyz0123456789+/"
+        if type(Base) == int:
+            """Valid Base..."""
+            if Base in range(36):
+                """Typical Numeric Scheme up to 36 Symbols..."""
+                Scheme = Scheme[:Base]
+            elif Base == 64:
+                """Standard Base64 Scheme..."""
+                Scheme = Base64
+            elif Base in (128, 256):
+                """Build a Scheme based on the ASCII set..."""
+                Scheme = ""
+                for ASCIIVal in range(Base):
+                    Scheme = Scheme + chr(ASCIIVal)
+        return Scheme
+    """Default Return..."""
+    return ""
+
+# =============================================================
+# base2Base(BaseValue, Base1, Base2)
+# =============================================================
+def base2Base(BaseVal, Base1, Base2):
+    """Convert any Base to any Base, from 2-36..."""
+    Success = type(BaseVal) == str \
+              and type(Base1) == int \
+              and type(Base2) == int
+    if Success:
+        return dec2Base(base2Dec(BaseVal, Base1), Base2)
+    """Default Return..."""
+    return ""
+
+# =============================================================
+# dec2Base(DecValue, Base)
+# =============================================================
+def dec2Base(DecValue, Base):
+    """Convert Decimal Value to Indicated Base..."""
+    Success = type(DecValue) == int \
+              and type(Base) == int
+    if Success:
+        """Initialize Local Variables..."""
+        Output = ""
+        Scheme = baseScheme(Base)
+        Div = DecValue
+        """Execute the Operation..."""
+        while Div > 0:
+            Rem = Div % Base
+            Div = Div // Base
+
+            Output = Scheme[Rem] + Output
+
+        return Output
+    """Default Return..."""
+    return ""
+
+# =============================================================
+# base2Dec(BaseValue, Base)
+# =============================================================
+def base2Dec(BaseValue, Base):
+    """Convert from one base to Decimal..."""
+    Success = type(BaseValue) == str \
+              and type(Base) == int
+    if Success:
+        """Initialize Local Variables..."""
+        ColCount = len(BaseValue)
+        Scheme = baseScheme(Base)
+        DecValue = 0
+        """Execute the Operation..."""
+        for Col in range(ColCount):
+            ColValue = Scheme.find(BaseValue.upper()[Col])
+            DecValue += ColValue * (Base ** (ColCount - (Col+1)))
+
+        return DecValue
+    """Default Return..."""
+    return 0
 
 # =============================================================
 # Autocall the main() function...
