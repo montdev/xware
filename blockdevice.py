@@ -102,11 +102,18 @@ def blockDrop(Blocks, BlockSize, BlockIndex):
               and type(BlockSize) == int and BlockSize > 0\
               and type(BlockIndex) == int and BlockIndex >= 0
     if Success:
+        """Validate the BlockIndex..."""
+        Count = blockCount(Blocks, BlockSize)
+        Success = between(BlockIndex, 0, Count - 1)
+        
+    if Success:
+        """Do the deed..."""
         BlockStart = BlockIndex * BlockSize
         BlockEnd = BlockStart + BlockSize
         return Blocks[:BlockStart] + Blocks[BlockEnd:]
+    
     """Default Return..."""
-    return ""
+    return Blocks
 
 # ============================================================
 # blockInsert(Blocks, BlockSize, BlockIndex, NewBlock)
