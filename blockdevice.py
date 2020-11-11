@@ -287,13 +287,21 @@ def field16Get(Data, FieldID, Property = None):
 
 def field16Put(Data, FieldID, Property, Value):
     """Put or Replace a Field16 Structure in the Set..."""
-    Success = type(Data) == str and type(FieldID) == int \
+    Success = type(Data) == str and field16IdValid(FieldID) \
        and type(Property) == str and len(Property) > 0
     
     if Success:
         """Get the Count..."""
         Count = blockCount(Data, 16)
-        if between(FieldID, 0, Count - 1):
+
+        """FieldID can now be Index or Key..."""
+        if type(FieldID) == str:
+            """Convert the Key to an Index..."""
+            Index = field16Find(Data, FieldID)
+        elif type(FieldID) == int :
+            Index = FieldID
+        
+        if between(Index, 0, Count - 1):
             """Valid FieldID..."""
             Property = Property.upper()
             Success = CalcOffsets = False
@@ -305,13 +313,17 @@ def field16Put(Data, FieldID, Property, Value):
                     CalcOffsets = True
             else:
                 """Grab the Field in question..."""
-                Field = blockGet(Data, 16, FieldID)
+                Field = blockGet(Data, 16, Index)
                 if Property == "NAME":
                     Success = type(Value) == str \
                                 and len(Value) > 0
                 elif Property in ("OFFSET", "SIZE", "FLAGS"):
                     Success = type(Value) == int \
                                 and Value >= 0
+                    
+                    if Success and Property == "SIZE":
+                        """Size must be greater than Zero..."""
+                        Success = Value > 0
                         
                 """Update the Field..."""
                 if Success:
