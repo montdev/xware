@@ -87,7 +87,7 @@ def blockPut(Blocks, BlockSize, BlockIndex, BlockData):
         BlockStart = BlockIndex * BlockSize
         BlockEnd = BlockStart + BlockSize
         return Blocks[:BlockStart] \
-               + BlockData.ljust(BlockSize, Padding) \
+               + BlockData[:BlockSize].ljust(BlockSize, Padding) \
                + Blocks[BlockEnd:]
     """Default return"""
     return ""
