@@ -518,7 +518,7 @@ def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
        and Field[:1].isalpha() \
-       and Field[:10].isalnum().strip(chr(0)):
+       and Field[:10].strip(chr(0)).isalnum():
         return True
 
     return False
