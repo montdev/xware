@@ -228,12 +228,19 @@ def blockSplit(Blocks, BlockSize, Delimiter):
 # *************************************************************
 # Field16 Field Set Functions...
 # *************************************************************
+
+# ============================================================
+# field16Count(Data)
+# ============================================================
 def field16Count(Data):
     """Return a Count of Field Structures..."""
     if type(Data) == str:
         return len(Data)//16
     return 0
     
+# ============================================================
+# field16Add(Data, Field, Size = None, Flags = None)
+# ============================================================
 def field16Add(Data, Field, Size = None, Flags = None):
     """Add a base Field16 Structure to the Field Set..."""
     if type(Data) == str and type(Field) == str:
@@ -254,6 +261,9 @@ def field16Add(Data, Field, Size = None, Flags = None):
     """Return the Unchanged Set..."""
     return Data
 
+# ============================================================
+# field16Get(Data, FieldID, Property = None)
+# ============================================================
 def field16Get(Data, FieldID, Property = None):
     """Get a Field16 Structure from the Set..."""
     if type(Data) == str and field16IdValid(FieldID):
@@ -286,6 +296,9 @@ def field16Get(Data, FieldID, Property = None):
     """Can't return what isn't there..."""
     return ""
 
+# ============================================================
+# field16Put(Data, FieldID, Property, Value)
+# ============================================================
 def field16Put(Data, FieldID, Property, Value):
     """Put or Replace a Field16 Structure in the Set..."""
     Success = type(Data) == str and field16IdValid(FieldID) \
@@ -340,6 +353,9 @@ def field16Put(Data, FieldID, Property, Value):
     return Data
            
 
+# ============================================================
+# field16Drop(Data, FieldID)
+# ============================================================
 def field16Drop(Data, FieldID):
     """Remove a Field16 Structure from the Set..."""
     if type(Data) == str and type(FieldID) == int:
@@ -361,18 +377,34 @@ def field16Drop(Data, FieldID):
             
     return Data
 
-def field16Insert(Data, InsertPoint, Field):
+# ============================================================
+# field16Insert(Data, FieldID, Field)
+# ============================================================
+def field16Insert(Data, FieldID, Field):
     """Insert a Field Structure at this point..."""
-    if type(Data) == str and type(InsertionPoint) == int \
+    if type(Data) == str and type(FieldID) == int \
        and type(Field) == str and len(Field) == 16:
+        """Get the Count..."""
         Count = blockCount(Data, 16)
-        if between(InsertionPoint, 0, Count - 1):
-            """We have a good InsertionPoint..."""
-            Data = blockInsert(Data, 16, InsertionPoint, Field)
+        Index = -1
+
+        """FieldID can now be Index or Key..."""
+        if type(FieldID) == str:
+            """Convert the Key to an Index..."""
+            Index = field16Find(Data, FieldID)
+        elif type(FieldID) == int :
+            Index = FieldID
+        
+        if between(Index, 0, Count - 1):
+            """Do the Insert here..."""
+            Data = blockInsert(Data, 16, Index, Field)
             Data = field16CalcOffsets(Data)
         
     return Data
 
+# ============================================================
+# field16Find(Data, Key)
+# ============================================================
 def field16Find(Data, Key):
     """Find a Field16 based on Name..."""
     if type(Data) == str and type(Key) == str \
@@ -390,6 +422,9 @@ def field16Find(Data, Key):
     return -1
             
 
+# ============================================================
+# field16CalcOffsets(Data)
+# ============================================================
 def field16CalcOffsets(Data):
     """Scan through the Fields and Calculate Offsets..."""
     if type(Data) == str:
@@ -407,6 +442,9 @@ def field16CalcOffsets(Data):
 # Field16 - Field Specific Functions...
 # =============================================
 
+# ============================================================
+# field16New(Name, Size, Flags = 0)
+# ============================================================
 def field16New(Name, Size, Flags = 0):
     """Create a base Field16 Structure..."""
     if type(Name) == str and len(Name) > 0 \
@@ -423,6 +461,9 @@ def field16New(Name, Size, Flags = 0):
     """Return an Empty Structure..."""
     return ""
 
+# ============================================================
+# field16Property(Data, Prop, Value=None)
+# ============================================================
 def field16Property(Data, Prop, Value=None):
     if type(Data) == str and len(Data) == 16 \
        and type(Prop) == str:
@@ -460,6 +501,9 @@ def field16Property(Data, Prop, Value=None):
                 return Data[:14] + str(Value)[:2].rjust(2,"0")
                 
 
+# ============================================================
+# field16Valid(Field)
+# ============================================================
 def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
@@ -472,7 +516,7 @@ def field16Valid(Field):
     return False
 
 # =============================================
-# Field16IDValid(FieldID)
+# field16IdValid(FieldID, Type = (int, str))
 # =============================================
 def field16IdValid(FieldID, Type = (int, str)):
     """Validate a FieldID..."""
@@ -487,9 +531,17 @@ def field16IdValid(FieldID, Type = (int, str)):
 # =============================================
 # Field16 - Flag Functions...
 # =============================================
+
+
+# ==================================================
+# field16FlagGet(Flags, Name, ReturnType="bool")
+# ==================================================
 def field16FlagGet(Flags, Name, ReturnType="bool"):
     pass
 
+# ==================================================
+# field16FlagSet(Flags, Name, Value)
+# ==================================================
 def field16FlagSet(Flags, Name, Value):
     pass
 
@@ -661,6 +713,9 @@ def byteSniffMsg(Flags = 0):
 # Other Helper Functions...
 # *************************************************************
 
+# ==================================================
+# between(Value, Min, Max)
+# ==================================================
 def between(Value, Min, Max):
     if type(Value) == int and type(Min) == int \
        and type(Max) == int:
