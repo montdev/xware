@@ -309,7 +309,7 @@ def field16Put(Data, FieldID, Property, Value):
             if Property == "FIELD":
                 """Put the whole Field..."""
                 if field16Valid(Value):
-                    Data = blockPut(Data, 16, Value)
+                    Data = blockPut(Data, 16, Index, Value)
                     CalcOffsets = True
             else:
                 """Grab the Field in question..."""
@@ -329,7 +329,7 @@ def field16Put(Data, FieldID, Property, Value):
                 if Success:
                     Field = field16Property(Field, Property, Value)
                     if field16Valid(Field):
-                        Data = blockPut(Data, 16, Field)
+                        Data = blockPut(Data, 16, Index, Field)
                         CalcOffsets = Property in ("OFFSET","SIZE")
                 
             if CalcOffsets:
