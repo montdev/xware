@@ -136,11 +136,13 @@ def blockInsert(Blocks, BlockSize, BlockID, NewBlock):
         Count = blockCount(Blocks, BlockSize)
         if between(BlockID, 0, Count - 1):
             Block = blockGet(Blocks, BlockSize, BlockID)
-            Block = Block + blockPad(NewBlock, BlockSize, Padding)
+            """Make sure NewBlock is no more than BlockSize but at least BlockSize..."""
+            Block = Block + NewBlock[:BlockSize].ljust(BlockSize, Padding)
             BlockStart = BlockID * BlockSize
             BlockEnd = BlockStart + BlockSize
-            Blocks = Blocks[:BlockStart] + Block \
-                     + Blocks[BlockEnd:]
+            return Blocks[:BlockStart] + Block + Blocks[BlockEnd:]
+        
+    return Blocks
 
 # ============================================================
 # blockPad(Blocks, BlockSize, PadChar)
