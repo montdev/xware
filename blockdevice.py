@@ -190,7 +190,7 @@ def blockFilter(Blocks, BlockSize, Key):
 # ============================================================
 # blockPad(Blocks, BlockSize, PadChar)
 # ============================================================
-def blockPad(Blocks, BlockSize, PadChar):
+def blockPad(Blocks, BlockSize, PadChar = chr(0)):
     """Add the right amount of padding for the set..."""
     """Validate parameters..."""
     Success = type(Blocks) == str \
@@ -243,6 +243,7 @@ def field16Count(Data):
 # ============================================================
 def field16Add(Data, Field, Size = None, Flags = None):
     """Add a base Field16 Structure to the Field Set..."""
+    CalcOffsets = False
     if type(Data) == str and type(Field) == str:
         """See if this is Field Object or Field Name..."""
         if Size == None and Flags == None \
@@ -251,14 +252,17 @@ def field16Add(Data, Field, Size = None, Flags = None):
             if field16Valid(Field):
                 """Write the Field to the Set..."""
                 Data = blockAdd(Data, 16, Field)
+                CalcOffsets = True
         elif type(Size) == int and Size > 0 \
              and type(Flags) == int and Flags >= 0:
             """Create a new field and add that..."""
             Field = field16New(Field, Size, Flags)
             if field16Valid(Field):
                 Data = blockAdd(Data, 16, Field)
+                CalcOffsets = True
                 
-        Data = field16CalcOffsets(Data)
+        if CalcOffsets:
+            Data = field16CalcOffsets(Data)
            
     """Return the Unchanged Set..."""
     return Data
@@ -399,9 +403,8 @@ def field16Insert(Data, FieldID, Field):
         
         if between(Index, 0, Count - 1):
             """Do the Insert here..."""
-            if field16Valid(Field):
-                Data = blockInsert(Data, 16, Index, Field)
-                Data = field16CalcOffsets(Data)
+            Data = blockInsert(Data, 16, Index, Field)
+            Data = field16CalcOffsets(Data)
         
     return Data
 
@@ -417,7 +420,7 @@ def field16Find(Data, Key):
         KeyLength = len(Key)
         for BlockID in range(Count):
             Block = blockGet(Data, 16, BlockID)
-            if Block[:KeyLength].upper() == Key:
+            if Block[:KeyLength].strip(chr(0)).upper() == Key:
                 """We found a match..."""
                 return BlockID
             
@@ -454,10 +457,10 @@ def field16New(Name, Size, Flags = 0):
        and Name[:1].isalpha() and Name.isalnum() \
        and type(Size) == int and Size > 0 \
        and type(Flags) == int and Flags >= 0:
-        Field = Name[:10].ljust(10, " ") \
-                + str(0).rjust(2,"0") \
-                + str(Size).rjust(2,"0") \
-                + str(Flags).rjust(2,"0")
+        Field = Name[:10].ljust(10, chr(0)) \
+                + int2Bytes(0, 2) \
+                + int2Bytes(Size, 2) \
+                + int2Bytes(Flags, 2)
 
         return Field
 
@@ -474,34 +477,37 @@ def field16Property(Data, Prop, Value=None):
         if Prop == "NAME":
             if Value == None:
                 """Get Name Value"""
-                return Data[:10].strip()
+                return Data[:10].strip(chr(0))
             elif type(Value) == str:
                 """Put Name Value"""
-                return Value[:10].ljust(10," ") \
+                return Value[:10].ljust(10,chr(0)) \
                        + Data[10:]
         elif Prop == "OFFSET":
             if Value == None:
                 """Get Offset Value"""
-                return int(Data[10:12])
+                return bytes2Int(Data[10:12])
             elif type(Value) == int:
                 """Put Offset Value"""
-                return Data[:10] + str(Value)[:2].rjust(2,"0") \
+                return Data[:10] \
+                       + int2Bytes(Value, 2) \
                        + Data[12:]
         elif Prop == "SIZE":
             if Value == None:
                 """Get Size Value"""
-                return int(Data[12:14])
+                return bytes2Int(Data[12:14])
             elif type(Value) == int:
                 """Put Size Value"""
-                return Data[:12] + str(Value)[:2].rjust(2,"0") \
+                return Data[:12] \
+                       + int2Bytes(Value, 2) \
                        + Data[14:]
         elif Prop == "FLAGS":
             if Value == None:
                 """Get Flags Value"""
-                return int(Data[14:])
+                return bytes2Int(Data[14:])
             elif type(Value) == int:
                 """Put Flags Value"""
-                return Data[:14] + str(Value)[:2].rjust(2,"0")
+                return Data[:14] \
+                       + int2Bytes(Value, 2)
                 
 
 # ============================================================
@@ -511,10 +517,7 @@ def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
        and Field[:1].isalpha() \
-       and Field[:10].isalnum() \
-       and Field[10:12].isdigit() \
-       and Field[12:14].isdigit() \
-       and Field[14:16].isdigit():
+       and Field[:10].isalnum().strip(chr(0)):
         return True
 
     return False
@@ -813,6 +816,34 @@ def base2Dec(BaseValue, Base):
         return DecValue
     """Default Return..."""
     return 0
+
+# =============================================================
+# int2Bytes(Int, Size)...
+# =============================================================
+def int2Bytes(Int, Size):
+    Bytes = ""
+    if type(Int) == int and type(Size) == int \
+       and Size > 0:
+        """Build the Bytes..."""
+        for Col in range(Size):
+            Bytes = Bytes + chr(Int//256**Col%256)
+            
+        return Bytes
+    return chr(0)*4
+
+# =============================================================
+# bytes2Int(Bytes)...
+# =============================================================
+def bytes2Int(Bytes):
+    Int = 0
+    if type(Bytes) == str and len(Bytes) > 0:
+        """Convert the Bytes to an Integer..."""
+        Size = len(Bytes)
+        for Byte in range(Size):
+            Int = Int + ord(Bytes[Byte:Byte+1]) \
+                  * 256**Byte
+
+    return Int
 
 # =============================================================
 # Autocall the main() function...
