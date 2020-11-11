@@ -178,7 +178,7 @@ def blockSplit(Blocks, BlockSize, Delimiter):
 def field16Count(Data):
     """Return a Count of Field Structures..."""
     if type(Data) == str:
-        return len(Data)/16
+        return len(Data)//16
     return 0
     
 def field16Add(Data, Field, Size = None, Flags = None):
