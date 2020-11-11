@@ -447,6 +447,19 @@ def field16Valid(Field):
     return False
 
 # =============================================
+# Field16IDValid(FieldID)
+# =============================================
+def field16IdValid(FieldID, Type = (int, str)):
+    """Validate a FieldID..."""
+    if bool(FieldID) and str(FieldID).isprintable():
+        if type(Type) == tuple:
+            return type(FieldID) in Type
+        elif type(Type) == Type:
+            return type(FieldID) == Type
+        
+    return False
+            
+# =============================================
 # Field16 - Flag Functions...
 # =============================================
 def field16FlagGet(Flags, Name, ReturnType="bool"):
