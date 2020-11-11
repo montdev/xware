@@ -259,6 +259,7 @@ def field16Get(Data, FieldID, Property = None):
     if type(Data) == str and field16IdValid(FieldID):
         """Get the Count and Validate the FieldID..."""
         Count = blockCount(Data, 16)
+        Index = -1
         
         """FieldID can now be Index or Key..."""
         if type(FieldID) == str:
@@ -293,6 +294,7 @@ def field16Put(Data, FieldID, Property, Value):
     if Success:
         """Get the Count..."""
         Count = blockCount(Data, 16)
+        Index = -1
 
         """FieldID can now be Index or Key..."""
         if type(FieldID) == str:
@@ -342,9 +344,19 @@ def field16Drop(Data, FieldID):
     """Remove a Field16 Structure from the Set..."""
     if type(Data) == str and type(FieldID) == int:
         """Get the Count..."""
+        
+        Index = -1
         Count = blockCount(Data, 16)
-        if between(FieldID, 0, Count - 1):
-            Data = blockDrop(Data, FieldID)
+
+        """FieldID can now be Index or Key..."""
+        if type(FieldID) == str:
+            """Convert the Key to an Index..."""
+            Index = field16Find(Data, FieldID)
+        elif type(FieldID) == int :
+            Index = FieldID
+
+        if between(Index, 0, Count - 1):
+            Data = blockDrop(Data, 16, Index)
             Data = field16CalcOffsets(Data)
             
     return Data
