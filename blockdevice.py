@@ -31,7 +31,7 @@ def blockCount(Blocks, BlockSize):
 # ============================================================
 # blockAdd(Blocks, BlockSize, NewBlock, Flags)
 # ============================================================
-def blockAdd(Blocks, BlockSize, NewBlock = "", Flags = 0):
+def blockAdd(Blocks, BlockSize, BlockData = "", Flags = 0):
     """Add a new Datablock to the set..."""
     """Create part of CRUD..."""
 
@@ -57,7 +57,9 @@ def blockGet(Blocks, BlockSize, BlockIndex):
     """Block Getter... Read part of CRUD..."""
     """Validate parameters..."""
     Success = type(Blocks) == str and type(BlockSize) == int\
-              and type(BlockIndex) == int
+              and BlockSize > 0 and type(BlockIndex) == int \
+              and BlockIndex >= 0
+
     if Success:
         Offset = BlockIndex * BlockSize
         return Blocks[Offset:Offset+BlockSize]
@@ -71,8 +73,8 @@ def blockPut(Blocks, BlockSize, BlockIndex, BlockData):
     """Block Put... Update part of CRUD..."""
     """Validate parameters..."""
     Success = type(Blocks) == str \
-              and type(BlockSize) == int\
-              and type(BlockIndex) == int\
+              and type(BlockSize) == int and BlockSize > 0 \
+              and type(BlockIndex) == int and BlockIndex >= 0 \
               and type(BlockData) == str
     if Success:
         Binary = byteSniffTest(byteSniff(BlockData), "BINARY")
@@ -104,6 +106,33 @@ def blockDrop(Blocks, BlockSize, BlockIndex):
         return Blocks[:BlockStart] + Blocks[BlockEnd:]
     """Default Return..."""
     return ""
+
+# ============================================================
+# blockInsert(Blocks, BlockSize, BlockIndex, NewBlock)
+# ============================================================
+def blockInsert(Blocks, BlockSize, BlockID, NewBlock):
+    """Insert a Block at this location..."""
+    Success = type(Blocks) == str and type(BlockSize) == int \
+              and type(BlockID) == int and type(NewBlock) == str
+
+    Success = Success and BlockSize > 0 and BlockID >= 0
+        
+    if Success:
+
+        Binary = byteSniffTest(byteSniff(NewBlock), "BINARY")
+        if Binary:
+            Padding = chr(0)
+        else:
+            Padding = " "
+
+        Count = blockCount(Blocks, BlockSize)
+        if between(BlockID, 0, Count - 1):
+            Block = blockGet(Blocks, BlockSize, BlockID)
+            Block = Block + blockPad(NewBlock, BlockSize, Padding)
+            BlockStart = BlockID * BlockSize
+            BlockEnd = BlockStart + BlockSize
+            Blocks = Blocks[:BlockStart] + Block \
+                     + Blocks[BlockEnd:]
 
 # ============================================================
 # blockPad(Blocks, BlockSize, PadChar)
@@ -152,43 +181,149 @@ def field16Count(Data):
         return len(Data)/16
     return 0
     
-def field16Add(Data, FieldID, Size = None, Flags = None):
+def field16Add(Data, Field, Size = None, Flags = None):
     """Add a base Field16 Structure to the Field Set..."""
-    if type(Data) == str and type(Field) == str \
-       and len(Field) > 0 and Field.isprintable() \
-       and  type(Size) == int and Size > 0 \
-       and type(Flags) == int and Flags >= 0:
-        if type(Size) == None and Type(Flags) == None:
-           """Validate Field as a Field Structure..."""
-           if field16Validate(Field):
-               pass
+    if type(Data) == str and type(Field) == str:
+        """See if this is Field Object or Field Name..."""
+        if Size == None and Flags == None \
+           and len(Field) == 16:
+            """This is a Field Object..."""
+            if field16Valid(Field):
+                """Write the Field to the Set..."""
+                Data = blockAdd(Data, 16, Field)
+        elif type(Size) == int and Size > 0 \
+             and type(Flags) == int and Flags >= 0:
+            """Create a new field and add that..."""
+            Field = field16New(Field, Size, Flags)
+            Data = blockAdd(Data, 16, Field)
+        Data = field16CalcOffsets(Data)
            
-
     """Return the Unchanged Set..."""
     return Data
 
 def field16Get(Data, FieldID, Property = None):
     """Get a Field16 Structure from the Set..."""
-    pass
+    if type(Data) == str:
+        """Get the Count and Validate the FieldID..."""
+        Count = blockCount(Data, 16)
+        
+        if type(FieldID) == int \
+           and between(FieldID, 0, Count - 1):
+            Field = blockGet(Data, 16, FieldID)
+            if Property == None:
+                return Field
+            else:
+                Property = Property.upper()
+                if Property == "NAME":
+                    return field16Property(Field, "NAME")
+                elif Property == "OFFSET":
+                    return field16Property(Field, "OFFSET")
+                elif Property == "SIZE":
+                    return field16Property(Field, "SIZE")
+                elif Property == "FLAGS":
+                    return field16Property(Field, "FLAGS")
+        else:
+            """The return would be expected to be integer.."""
+            if type(Property) == str \
+               and Property.upper() in ("OFFSET", "SIZE", "FLAGS"):
+                return -1
+    
+    """Can't return what isn't there..."""
+    return ""
 
-def field16Put(Data, FieldID, Property = None):
+def field16Put(Data, FieldID, Property, Value):
     """Put or Replace a Field16 Structure in the Set..."""
-    pass
+    Success = type(Data) == str and type(FieldID) == int \
+       and type(Property) == str and len(Property) > 0
+    
+    if Success:
+        """Get the Count..."""
+        Count = blockCount(Data, 16)
+        if between(FieldID, 0, Count - 1):
+            """Valid FieldID..."""
+            Property = Property.upper()
+            Success = CalcOffsets = False
+            
+            if Property == "FIELD":
+                """Put the whole Field..."""
+                if field16Valid(Value):
+                    Data = blockPut(Data, 16, Value)
+                    CalcOffsets = True
+            else:
+                """Grab the Field in question..."""
+                Field = blockGet(Data, 16, FieldID)
+                if Property == "NAME":
+                    Success = type(Value) == str \
+                                and len(Value) > 0
+                elif Property in ("OFFSET", "SIZE", "FLAGS"):
+                    Success = type(Value) == int \
+                                and Value >= 0
+                    CalcOffsets = Property in ("OFFSET","SIZE")
+                        
+                """Update the Field..."""
+                if Success:
+                    Field = field16Property(Field, Property, Value)
+                    if field16Valid(Field):
+                        Data = blockPut(Data, 16, Field)
+                
+            if CalcOffsets:
+                Data = field16CalcOffsets(Data)
+                    
+    return Data
+           
 
 def field16Drop(Data, FieldID):
     """Remove a Field16 Structure from the Set..."""
-    pass
+    if type(Data) == str and type(FieldID) == int:
+        """Get the Count..."""
+        Count = blockCount(Data, 16)
+        if between(FieldID, 0, Count - 1):
+            Data = blockDrop(Data, FieldID)
+            Data = field16CalcOffsets(Data)
+            
+    return Data
 
 def field16Insert(Data, InsertPoint, Field):
     """Insert a Field Structure at this point..."""
-    pass
+    if type(Data) == str and type(InsertionPoint) == int \
+       and type(Field) == str and len(Field) == 16:
+        Count = blockCount(Data, 16)
+        if between(InsertionPoint, 0, Count - 1):
+            """We have a good InsertionPoint..."""
+            Data = blockInsert(Data, 16, InsertionPoint, Field)
+            Data = field16CalcOffsets(Data)
+        
+    return Data
 
 def field16Find(Data, Key):
     """Find a Field16 based on Name..."""
-    pass
+    if type(Data) == str and type(Key) == str \
+       and bool(Key) and Key.isprintable():
+        Count = blockCount(Data, 16)
+        Key = Key.upper()
+        KeyLength = len(Key)
+        for BlockID in range(Count):
+            Block = blockGet(Data, 16, BlockID)
+            if Block[:KeyLength].upper() == Key:
+                """We found a match..."""
+                return BlockID
+            
+    """Block Not Found..."""
+    return -1
+            
 
-def field16CalcOffset(Data):
-    pass
+def field16CalcOffsets(Data):
+    """Scan through the Fields and Calculate Offsets..."""
+    if type(Data) == str:
+        Offset = 0
+        Count = blockCount(Data, 16)
+        for BlockID in range(Count):
+            Block = blockGet(Data, 16, BlockID)
+            Block = field16Property(Block, "Offset", Offset)
+            Offset = Offset + field16Property(Block, "Size")
+            Data = blockPut(Data, 16, BlockID, Block)
+
+    return Data
 
 # =============================================
 # Field16 - Field Specific Functions...
@@ -197,8 +332,10 @@ def field16CalcOffset(Data):
 def field16New(Name, Size, Flags = 0):
     """Create a base Field16 Structure..."""
     if type(Name) == str and len(Name) > 0 \
-       and type(Size) == int and Size > 0:
-        Field = blockPad(Name, 10, " ") \
+       and Name[:1].isalpha() and Name.isprintable() \
+       and type(Size) == int and Size > 0 \
+       and type(Flags) == int and Flags >= 0:
+        Field = Name[:10].ljust(10, " ") \
                 + str(0).rjust(2,"0") \
                 + str(Size).rjust(2,"0") \
                 + str(Flags).rjust(2,"0")
@@ -209,9 +346,43 @@ def field16New(Name, Size, Flags = 0):
     return ""
 
 def field16Property(Data, Prop, Value=None):
-    pass
+    if type(Data) == str and len(Data) == 16 \
+       and type(Prop) == str:
+        Prop = Prop.upper()
+        if Prop == "NAME":
+            if Value == None:
+                """Get Name Value"""
+                return Data[:10].strip()
+            elif type(Value) == str:
+                """Put Name Value"""
+                return Value[:10].ljust(10," ") \
+                       + Data[10:]
+        elif Prop == "OFFSET":
+            if Value == None:
+                """Get Offset Value"""
+                return int(Data[10:12])
+            elif type(Value) == int:
+                """Put Offset Value"""
+                return Data[:10] + str(Value)[:2].rjust(2,"0") \
+                       + Data[12:]
+        elif Prop == "SIZE":
+            if Value == None:
+                """Get Size Value"""
+                return int(Data[12:14])
+            elif type(Value) == int:
+                """Put Size Value"""
+                return Data[:12] + str(Value)[:2].rjust(2,"0") \
+                       + Data[14:]
+        elif Prop == "FLAGS":
+            if Value == None:
+                """Get Flags Value"""
+                return int(Data[14:])
+            elif type(Value) == int:
+                """Put Flags Value"""
+                return Data[:14] + str(Value)[:2].rjust(2,"0")
+                
 
-def field16IsValid(Field):
+def field16Valid(Field):
     """Validate a Field16 Structure..."""
     if type(Field) == str and len(Field) == 16 \
        and Field[:10].isprintable() \
@@ -395,6 +566,17 @@ def byteSniffMsg(Flags = 0):
 
     return FlagSet
 
+# *************************************************************
+# Other Helper Functions...
+# *************************************************************
+
+def between(Value, Min, Max):
+    if type(Value) == int and type(Min) == int \
+       and type(Max) == int:
+        return Value >= Min and Value <= Max
+
+    return False
+    
 
 # =============================================================
 # Autocall the main() function...
