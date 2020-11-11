@@ -263,26 +263,19 @@ def field16Get(Data, FieldID, Property = None):
         """FieldID can now be Index or Key..."""
         if type(FieldID) == str:
             """Convert the Key to an Index..."""
-            Field = field16Find(Data, FieldID)
+            Index = field16Find(Data, FieldID)
         elif type(FieldID) == int :
-            Field = FieldID
+            Index = FieldID
         
-        if between(Field, 0, Count - 1):
-            Field = blockGet(Data, 16, FieldID)
+        if between(Index, 0, Count - 1):
+            Field = blockGet(Data, 16, Index)
             if Property == None:
                 """Just return the field itself..."""
                 return Field
             else:
                 """Extract the appropriate Field Property..."""
-                Property = Property.upper()
-                if Property == "NAME":
-                    return field16Property(Field, "NAME")
-                elif Property == "OFFSET":
-                    return field16Property(Field, "OFFSET")
-                elif Property == "SIZE":
-                    return field16Property(Field, "SIZE")
-                elif Property == "FLAGS":
-                    return field16Property(Field, "FLAGS")
+                if Property.upper() in ("NAME", "OFFSET", "SIZE", "FLAGS")
+                    return field16Property(Field, Property)
 
     """The return would be expected to be integer.."""
     if type(Property) == str \
