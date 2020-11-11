@@ -803,7 +803,10 @@ def base2Dec(BaseValue, Base):
         DecValue = 0
         """Execute the Operation..."""
         for Col in range(ColCount):
-            ColValue = Scheme.find(BaseValue.upper()[Col])
+            if Base > 36:
+                ColValue = Scheme.find(BaseValue[Col])
+            else:
+                ColValue = Scheme.find(BaseValue.upper()[Col])
             DecValue += ColValue * (Base ** (ColCount - (Col+1)))
 
         return DecValue
