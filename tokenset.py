@@ -1130,10 +1130,10 @@ def tokenGroupKeyGet(Set, Delimiter, Group, Key):
         """Find the Group Key..."""
         Index = tokenGroupKeyFind(Set, Delimiter, Group, Key)
         if Index > 0:
-            KeyLength = len(Key)
             """The Group Key has been found..."""
+            KeyLength = len(Key)
             Token = tokenGet(Set, Delimiter, Index)
-            return Token[:KeyLength]
+            return Token[KeyLength:]
         
     """Return the default for Not Found..."""
     return ""
