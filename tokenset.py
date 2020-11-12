@@ -1144,15 +1144,30 @@ def tokenGroupKeyPut(Set, Delimiter, Group, Key, Value):
         and len(Delimiter) > 0 and tokenIdValid(Group, str) \
         and tokenIdValid(Key, str):
         """Find the Group Key..."""
-        Index = tokenGroupKeyFind(Set, Delimiter, Group, Key)
-        if Index > 0:
+        GroupHeader = tokenFind(Set, Delimiter, Group)
+        if GroupHeader > 0:
             """The Group Key has been found..."""
+            Count = tokenCount(Set, Delimiter)
+            Index = GroupHeader + 1
+            Key = Key.upper()
+            KeyLength = len(Key)
             Token = Key + Value
-            return tokenPut(Set, Delimiter, Index, Token)
+            while True:
+                Token = tokenGet(Set, Delimiter, Index)
+                if Key == Token[:KeyLength].upper():
+                    """Group Key has been found..."""
+                    return tokenPut(Set, Delimiter, Index, Key + Value)
+                elif Token[:1] == "[":
+                    """Found the next Group Header..."""
+                    return tokenInsert(Set, Delimiter, Index, Key + Value)
+                elif Index == Count
+                    """Found the end of the list..."""
+                    return tokenAdd(Set, Delimiter, Key + Value)
+                else:
+                    Index += 1
         
     """Return the default for Not Found..."""
     return Set
-
 
 # ====================================================================
 # tokenGroupKeyDrop(Set, Delimiter, Group, Key)
