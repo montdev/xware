@@ -1065,12 +1065,13 @@ def tokenGroupDrop(Set, Delimiter, TokenGroup, Flags):
                 Token = tokenGet(Set, Delimiter, Index)
                 
                 """Test to see if we've reached the end of the Group..."""
-                if Token[:1] == "[" or Token == "":
+                if Token[:1] == "[" or GroupHead == Count:
                     """We're done, Drop the Group Header..."""
                     return tokenDrop(Set, Delimiter, GroupHead)
                 else:
                     """Drop this Token from the Group..."""
                     Set = tokenDrop(Set, Delimiter, Index)
+                    Count = Count - 1
 
     """Return the Empty Value..."""
     return ""
