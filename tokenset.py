@@ -1153,18 +1153,18 @@ def tokenGroupKeyPut(Set, Delimiter, Group, Key, Value):
             Index = GroupHeader + 1
             Key = Key.upper()
             KeyLength = len(Key)
-            Token = Key + Value
+            Value = Key + Value
             while True:
                 Token = tokenGet(Set, Delimiter, Index)
                 if Key == Token[:KeyLength].upper():
                     """Group Key has been found..."""
-                    return tokenPut(Set, Delimiter, Index, Key + Value)
+                    return tokenPut(Set, Delimiter, Index, Value)
                 elif Token[:1] == "[":
                     """Found the next Group Header..."""
-                    return tokenInsert(Set, Delimiter, Index, Key + Value)
+                    return tokenInsert(Set, Delimiter, Index, Value)
                 elif Index == Count
                     """Found the end of the list..."""
-                    return tokenAdd(Set, Delimiter, Key + Value)
+                    return tokenAdd(Set, Delimiter, Value)
                 else:
                     Index += 1
         
