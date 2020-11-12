@@ -717,6 +717,23 @@ def tokenIsKey(Set, Delimiter, Key, Flags = 0):
     return bool(Token)
 
 # ============================================================
+# tokenGetKey(Set, Delimiter, Index, KeyTerm, Flags = 0)
+# ============================================================
+def tokenGetKey(Set, Delimiter, Index, KeyTerm, Flags = 0):
+    """Used to request a Key from an Index..."""
+    if type(Set) == str and type(Delimiter) == str \
+        and len(Delimiter) > 0 and tokenIdValid(Index, int) \
+        and type(KeyTerm) == str and len(KeyTerm) > 0 \
+        and type(Flags) == int:
+        """Extract the Token for the Index..."""
+        Token = tokenGet(Set, Delimiter, Index)
+        return tokenGet(Token, KeyTerm, 1)
+    
+    """Retern the default for did not find..."""
+    return ""
+
+
+# ============================================================
 # tokenSetCount(Set, Delimiter, Size, Flags = 0)
 # Change the Size of a TokenSet...
 # ============================================================
