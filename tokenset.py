@@ -1039,8 +1039,8 @@ def tokenGroupPut(Set, Delimiter, TokenGroup, GroupData, Flags = 0):
         else:
             """The Group doesn't appear to exist..."""
             """Just append the Group to the End..."""
-            Set = tokenAdd(Set, Delimiter, TokenGroup)
-            return tokenAdd(Set, Delimiter, GroupData)
+            TokenGroup = TokenGroup + Delimiter + GroupData
+            return tokenAdd(Set, Delimiter, TokenGroup)
 
     return Set
 
