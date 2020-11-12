@@ -1088,6 +1088,7 @@ def tokenGroupKeyFind(Set, Delimiter, Group, Key):
         GroupHeader = tokenFind(Set, Delimiter, Group)
         if GroupHeader > 0:
             """Locate the Group Key..."""
+            Count = tokenCount(Set, Delimiter)
             Index = GroupHeader + 1
             Key = Key.upper()
             KeyLength = len(Key)
@@ -1098,11 +1099,11 @@ def tokenGroupKeyFind(Set, Delimiter, Group, Key):
                 if Key == Token[:KeyLength].upper():
                     """Key Found..."""
                     return Index
-                elif Token[:1] == "[":
-                    """Found the Next Group Header..."""
+                elif Token[:1] == "[" or Index == Count:
+                    """Found the Next Group Header, or the end of the list..."""
                     return 0
-                elif Token == "":
-                    return 0
+                else:
+                    Index += 1
                 
     """Return the Default for not found..."""
     return 0
