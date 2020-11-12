@@ -946,6 +946,33 @@ def tokenFlagSet(Flags, Property, Value = 1):
 
 # ============================================================
 # ************************************************************
+# TokenGroup Functions...
+# ************************************************************
+# ============================================================
+
+# ============================================================
+# tokenGroupCount(Set, Delimiter)
+# ============================================================
+def tokenGroupCount(Set, Delimiter):
+    """Count the Group Headers..."""
+    if type(Set) == str and type(Delimiter) == str \
+        and len(Delimiter) > 0:
+        return tokenCount(Set, Delimiter, "[")
+    return 0 
+
+# ============================================================
+# tokenGroupList(Set, Delimiter)
+# ============================================================
+def tokenGroupList(Set, Delimiter):
+    """TokenGroups look like INIFile Sections..."""
+    if type(Set) == str and type(Delimiter) == str \
+        and len(Delimiter) > 0:
+        """Extract a list of Group Headers..."""
+        return tokenFilter(Set, Delimiter, "[")
+    return ""
+
+# ============================================================
+# ************************************************************
 # Helper Functions...
 # ************************************************************
 # ============================================================
