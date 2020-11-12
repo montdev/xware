@@ -166,7 +166,8 @@ def tokenCount(Set, Delimiter, Key = "", Flags = 0):
     """Initialize Local Variables..."""
     Count = 0
     """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
+    Success = type(Set) == str \
+              and type(Delimiter) == str \
               and len(Delimiter) > 0 
     
     if Success:
@@ -188,41 +189,45 @@ def tokenCount(Set, Delimiter, Key = "", Flags = 0):
 def tokenAdd(Set, Delimiter, Token, Flags=0):
     """ Append a Token to the End of the Set"""
     """ This is the Create Part of CRUD..."""
+    
     """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and type(Token) == str \
-              and type(Flags) == int
+    Success = type(Set) == str \
+              and type(Delimiter) == str \
+              and len(Delimiter) > 0 \
+              and type(Token) == str
 
-    """Test for NO_NULL_TOKENS..."""
-    if Success and tokenFlagGet(Flags, "NO_NULL_TOKENS"):
-        """Test the Token to see that it isn't NULL..."""
-        Success = len(Token) > 0
-            
+    """Test related Flags..."""
+    NoNulls = tokenFlagGet(Flags, "NO_NULL_TOKENS")
+    Unique = tokenFlagGet(Flags, "UNIQUE")
+    Sorted = tokenFlagGet(Flags, "SORTED")
+    Reverse = tokenFlagGet(Flags, "REVERSE")
+    
     if Success:
-        
-        if len(Set) == 0:
-            """ This will be the first token in the set... """
+        """Test the Local Flag Rules..."""
+        if NoNulls and len(Token) == 0:
+            """Insure Token isn't NULL..."""
+            return Set
+        elif Unique and tokenFound(Set, Delimiter, Token, Flags):
+            """Unique Tokens Only..."""
+            return Set
+        elif len(Set) == 0:
+            """Don't Sweat the Small Stuff..."""
             if len(Token) == 0:
+                """Make it look like a Size of One..."""
                 return " "
-            return Token
-        else:
-            """Test for UNIQUE..."""
-            if tokenFlagGet(Flags, "UNIQUE"):
-                """Test the Token to see that it is Unique..."""
-                if tokenFind(Set, Delimiter, Token, Flags) > 0:
-                    """Token Exists, Return the Unchanged Set..."""
-                    return Set
-            
-            if tokenFlagGet(Flags, "SORTED"):
-                """ Insert in a Sorted Fashion (index=0)... """
-                return tokenInsert(Set, Delimiter, 0, Token, Flags)
-            elif tokenFlagGet(Flags, "REVERSE"):
-                """Prepend to the beginning of the TokenSet..."""
-                return Token + Delimiter + Set
             else:
-                """ This will be a normal Append Operation... """
-                return Set + Delimiter + Token
-            
+                """This is the only Token..."""
+                return Token
+        elif Sorted:
+            """Insert in a Sorted Fashion (index=0)... """
+            return tokenInsert(Set, Delimiter, 0, Token, Flags)
+        elif Reverse:
+            """Prepend to the beginning of the TokenSet..."""
+            return Token + Delimiter + Set
+        else:
+            """This will be a normal Append Operation... """
+            return Set + Delimiter + Token
+        
     """Default Return the Set unchanged..."""
     return Set
 
@@ -250,9 +255,10 @@ def tokenGet(Set, Delimiter, TokenID, Flags = 0):
     Key = Value = ""
 
     """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
-              and type(Flags) == int
+    Success = type(Set) == str \
+              and type(Delimiter) == str \
+              and len(Delimiter) > 0 \
+              and tokenIdValid(TokenID)
     
     if Success:
         """Get the Count..."""
@@ -658,6 +664,15 @@ def tokenFind(Set, Delimiter, Key, Flags = 0):
 
     """Default Return..."""
     return 0
+
+# ============================================================
+# tokenFound(Set, Delimiter, Key, Flags = 0)
+# ============================================================
+def tokenFound(Set, Delimiter, Key, Flags = 0):
+    if tokenFind(Set, Delimiter, Key, Flags) > 0:
+        return True
+    else:
+        return False
 
 # ============================================================
 # tokenFilter(Set, Delimiter, Key, Flags = 0)
