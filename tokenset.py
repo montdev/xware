@@ -1107,6 +1107,18 @@ def tokenGroupKeyFind(Set, Delimiter, Group, Key):
     return 0
 
 # ====================================================================
+# tokenGroupKeyExists(Set, Delimiter, Group, Key)
+# ====================================================================
+def tokenGroupKeyExists(Set, Delimiter, Group, Key):
+    if type(Set) == str and type(Delimiter) == str \
+        and len(Delimiter) > and tokenIdValid(Group, str) \
+        and tokenIdValid(Key, str):
+        Index = tokenGroupKeyFind(Set, Delimiter, Group, Key)
+        return Index > 0
+    
+    return False
+
+# ====================================================================
 # tokenGroupKeyGet(Set, Delimiter, Group, Key)
 # ====================================================================
 def tokenGroupKeyGet(Set, Delimiter, Group, Key):
