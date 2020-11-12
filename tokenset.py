@@ -515,9 +515,9 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
             
             Count = tokenCount(Set, Delimiter)
             InsertHere = False
-            Descending = tokenFlagGet(Flags,"DESCENDING")
+            Descending = tokenFlagGet(Flags, "DESCENDING")
 
-            for Item in range(0, Count):
+            for Item in range(Count):
 
                 """Get the Token for Testing..."""
                 TokenValue = tokenGet(Set, Delimiter, Item + 1)
@@ -591,7 +591,7 @@ def tokenOrder(Set, Delimiter, Flags = 0):
             NewSet = ""
             
             """Perform the Reorder Operation..."""
-            for Index in range(0, Count):
+            for Index in range(Count):
                 
                 """Extract the Token..."""
                 Token = tokenGet(Set, Delimiter, Index + 1)
@@ -636,7 +636,7 @@ def tokenFind(Set, Delimiter, Key, Flags = 0):
         KeyLength = len(Key)
 
         """Find First Match for Key..."""
-        for Index in range(0, Count):
+        for Index in range(Count):
             """ Check to see if this is the Token..."""
             Token = tokenGet(Set, Delimiter, Index + 1)
             
@@ -681,7 +681,7 @@ def tokenFilter(Set, Delimiter, Key, Flags = 0):
 
         Count = tokenCount(Set, Delimiter)
 
-        for Index in range(0, Count):
+        for Index in range(Count):
             """ Check to see if this is the Token..."""
             Token = tokenGet(Set, Delimiter, Index + 1)
             
@@ -727,9 +727,10 @@ def tokenGetKey(Set, Delimiter, Index, Terminator, Flags = 0):
         and type(Flags) == int:
         """Extract the Token for the Index..."""
         Token = tokenGet(Set, Delimiter, Index)
+        """Return the first part..."""
         return tokenGet(Token, Terminator, 1)
     
-    """Retern the default for did not find..."""
+    """Return the default for did not find..."""
     return ""
 
 # ============================================================
@@ -967,24 +968,26 @@ def tokenFlagSet(Flags, Property, Value = 1):
 # ============================================================
 
 # ============================================================
-# tokenGroupCount(Set, Delimiter, Flags)
+# tokenGroupCount(Set, Delimiter, Key, Flags)
 # ============================================================
-def tokenGroupCount(Set, Delimiter, Flags):
+def tokenGroupCount(Set, Delimiter, Key, Flags):
     """Count the Group Headers..."""
     if type(Set) == str and type(Delimiter) == str \
-        and len(Delimiter) > 0:
-        return tokenCount(Set, Delimiter, "[", Flags)
+        and len(Delimiter) > 0 and type(Key) == str \
+        and len(Key) > 0:
+        return tokenCount(Set, Delimiter, Key, Flags)
     return 0 
 
 # ============================================================
-# tokenGroupList(Set, Delimiter, Flags)
+# tokenGroupList(Set, Delimiter, Key, Flags)
 # ============================================================
-def tokenGroupList(Set, Delimiter, Flags):
+def tokenGroupList(Set, Delimiter, Key, Flags):
     """TokenGroups look like INIFile Sections..."""
     if type(Set) == str and type(Delimiter) == str \
-        and len(Delimiter) > 0:
+        and len(Delimiter) > 0 and type(Key) == str \
+        and len(Key) > 0:
         """Extract a list of Group Headers..."""
-        return tokenFilter(Set, Delimiter, "[", Flags)
+        return tokenFilter(Set, Delimiter, Key, Flags)
     return ""
 
 # ============================================================
@@ -1008,7 +1011,7 @@ def tokenGroupGet(Set, Delimiter, Group, Flags = 0):
                 Token = tokenGet(Set, Delimiter, Index)
                 
                 """Test to see if we've reached the end of the Group..."""
-                if Token[:1] == "[":
+                if Token[:1] == Group[:1]:
                     """We're done, return what we have..."""
                     return Result
                 elif Index == Count:
@@ -1043,7 +1046,7 @@ def tokenGroupPut(Set, Delimiter, Group, Data, Flags = 0):
                 Token = tokenGet(Set, Delimiter, Index)
                 
                 """Test to see if we've reached the end of the Group..."""
-                if Token[:1] == "[":
+                if Token[:1] == Group[:1]:
                     """This should be the next group or the end..."""
                     """Insert the NewGroup before the next Group Header..."""
                     return tokenInsert(Set, Delimiter, Index, Data)
@@ -1083,7 +1086,7 @@ def tokenGroupDrop(Set, Delimiter, Group, Flags):
                 Token = tokenGet(Set, Delimiter, Index)
                 
                 """Test to see if we've reached the end of the Group..."""
-                if Token[:1] == "[" or Header == Count:
+                if Token[:1] == Group[:1] or Header == Count:
                     """We're done, Drop the Group Header..."""
                     return tokenDrop(Set, Delimiter, Header)
                 else:
@@ -1116,8 +1119,9 @@ def tokenGroupKeyFind(Set, Delimiter, Group, Key):
                 if Key == Token[:KeyLength].upper():
                     """Key Found..."""
                     return Index
-                elif Token[:1] == "[" or Index == Count:
-                    """Found the Next Group Header, or the end of the list..."""
+                elif Token[:1] == Group[:1] or Index == Count:
+                    """Found the Next Group Header, or the
+                       end of the list..."""
                     return 0
                 else:
                     Index += 1
@@ -1177,7 +1181,7 @@ def tokenGroupKeyPut(Set, Delimiter, Group, Key, Value):
                 if Key == Token[:KeyLength].upper():
                     """Group Key has been found..."""
                     return tokenPut(Set, Delimiter, Index, Value)
-                elif Token[:1] == "[":
+                elif Token[:1] == Group[:1]:
                     """Found the next Group Header..."""
                     return tokenInsert(Set, Delimiter, Index, Value)
                 elif Index == Count
