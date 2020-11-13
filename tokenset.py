@@ -305,85 +305,90 @@ def tokenGet(Set, Delimiter, TokenID, Flags = 0):
 # ============================================================
 def tokenPut(Set, Delimiter, TokenID, Value, Flags = 0):
     """Update the Indicated Token..."""
+    
+    """Test related Flags..."""
+    NoNulls = tokenFlagGet(Flags, "NO_NULL_TOKENS")
 
-    """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
-              and type(Value) == str and type(Flags) == int
-
-    AllowNulls = True
-
-    """Test for NullNess on the Token..."""
-    if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
-        AllowNulls = False
-        Success = len(Value) > 0
-
-    if Success:
-        """Initialize Local Variables..."""
-        Token = Head = Tail = 0
-        TokenValue = ""
-        Count = tokenCount(Set, Delimiter)
-
-        """Check to see if Key to Index lookup is needed..."""
-        if type(TokenID) == str:
-                
-            """Do a Key to Index lookup..."""
-            Token = tokenFind(Set, Delimiter, TokenID, Flags)
-            TokenValue = TokenID + Value
-                
-        else:
-            """This is a normal Token Index..."""
-            Token = TokenID
-            TokenValue = Value
-
-        """Check Flags for Unique Requirement..."""
-        if tokenFlagGet(Flags,"UNIQUE"):
-            if tokenFind(Set, Delimiter, TokenValue, Flags) > 0:
-                """Token already exists..."""
-                """Return the Unchanged Set..."""
-                return Set
-            
-        """Check to see if this is a Sorted Set..."""
-        Sorted = tokenFlagGet(Flags, "SORTED")
-        if Sorted and (type(TokenID) == int or Token == 0):
-            """If Key based and not Slotted it should be inserted anyway
-               but if it's Index based it won't be sorted after
-               changing it so it should be dropped and inserted..."""
-            if Token > 0:
-                Set = tokenDrop(Set, Delimiter, Token)
-            return tokenInsert(Set, Delimiter, 0, TokenValue, Flags)
-            
-        elif Token == 0:
-            """Just append the Unslotted Value to the End..."""
-            return tokenAdd(Set, Delimiter, TokenValue, Flags)
-            
-        elif Token > Count and AllowNulls:
-            """The set will have to be expanded to accomodate..."""
-            
-            return Set + (Delimiter * ((Token - 1) - Count)) + TokenValue
+    if NoNulls and type(Value) == str \
+       and len(Value) == 0:
+        """Do not allow a Null Value..."""
+        return Set
+    
+    """Get the count..."""
+    Count = tokenCount(Set, Delimiter)
+    
+    if Count >= 0 \
+       and tokenIdValid(TokenID) \
+       and type(Value) == str:
+    
+        """Validate parameters..."""
+        Success =  type(Value) == str
         
-        elif Token == 1:
-            """Update the first token..."""
-            if Count in (0,1):
-                """This is the only token in the set..."""
-                """It should put it though if count is 0 or 1..."""
-                return TokenValue
+        if Success:
+            
+            """Initialize Local Variables..."""
+            Token = Head = Tail = 0
+            TokenValue = ""
+
+            """Check to see if Key to Index lookup is needed..."""
+            if type(TokenID) == str:
+                    
+                """Do a Key to Index lookup..."""
+                Token = tokenFind(Set, Delimiter, TokenID, Flags)
+                TokenValue = TokenID + Value
+                    
             else:
-                Tail = Set.find(Delimiter)
-                return TokenValue + Set[Tail:]
+                """This is a normal Token Index..."""
+                Token = TokenID
+                TokenValue = Value
+
+            """Check Flags for Unique Requirement..."""
+            if tokenFlagGet(Flags, "UNIQUE"):
+                if tokenFind(Set, Delimiter, TokenValue, Flags) > 0:
+                    """Token already exists..."""
+                    """Return the Unchanged Set..."""
+                    return Set
+                
+            """Check to see if this is a Sorted Set..."""
+            Sorted = tokenFlagGet(Flags, "SORTED")
+            if Sorted and (type(TokenID) == int or Token == 0):
+                """If Key based and not Slotted it should be inserted anyway
+                   but if it's Index based it won't be sorted after
+                   changing it so it should be dropped and inserted..."""
+                if Token > 0:
+                    Set = tokenDrop(Set, Delimiter, Token)
+                return tokenInsert(Set, Delimiter, 0, TokenValue, Flags)
+                
+            elif Token == 0:
+                """Just append the Unslotted Value to the End..."""
+                return tokenAdd(Set, Delimiter, TokenValue, Flags)
+                
+            elif Token > Count and AllowNulls:
+                """The set will have to be expanded to accomodate..."""
+                
+                return Set + (Delimiter * ((Token - 1) - Count)) + TokenValue
             
-        elif Token == Count:
-            """Update the last token..."""
-            Head = Set.rindex(Delimiter) + len(Delimiter)
-            return Set[:Head] + TokenValue
-        
-        else:
-            """Update a middle token..."""
-            Head = tokenAt(Set, Delimiter, Token - 2) + len(Delimiter)
-            Tail = Set.find(Delimiter, Head + 1)
-            return Set[:Head] + TokenValue + Set[Tail:]
-        
-    """Default Return, Unchanged Set..."""
+            elif Token == 1:
+                """Update the first token..."""
+                if Count in (0,1):
+                    """This is the only token in the set..."""
+                    """It should put it though if count is 0 or 1..."""
+                    return TokenValue
+                else:
+                    Tail = Set.find(Delimiter)
+                    return TokenValue + Set[Tail:]
+                
+            elif Token == Count:
+                """Update the last token..."""
+                Head = Set.rindex(Delimiter) + len(Delimiter)
+                return Set[:Head] + TokenValue
+            
+            else:
+                """Update a middle token..."""
+                Head = tokenAt(Set, Delimiter, Token - 2) + len(Delimiter)
+                Tail = Set.find(Delimiter, Head + 1)
+                return Set[:Head] + TokenValue + Set[Tail:]
+    
     return Set
 
 # ============================================================
