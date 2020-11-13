@@ -243,43 +243,30 @@ def tokenAdd(Set, Delimiter, Token, Flags=0):
 def tokenGet(Set, Delimiter, TokenID, Flags = 0):
     """Extract the indicated Token"""
     """First we need to know how many Tokens there are..."""
-    
-    """This has also been extended to support Named Sets...
-       If Keyed, the Key will be removed fromm the Value...
-       Theoretically we could have a Flag that is used to
-       Force the Creation of a Key...
-    """
-    
-    """Initialize Local Variables"""
-    Token = Count = Start = Length = KeyLength = 0
-    Key = Value = ""
 
-    """Validate parameters..."""
-    Success = type(Set) == str \
-              and type(Delimiter) == str \
-              and len(Delimiter) > 0 \
-              and tokenIdValid(TokenID)
-    
-    if Success:
-        """Get the Count..."""
-        Count = tokenCount(Set, Delimiter)
+    Count = tokenCount(Set, Delimiter)
+    KeyLength = 0
+    Value = ""
 
+    if Count > 0 and tokenIdValid(TokenID):
+        
         """Check to see if a Keyed Lookup is needed..."""
         if type(TokenID) == str:
             """Do a Key to Index lookup..."""
             """Convert the Key to an Index..."""
-            Key = TokenID
-            KeyLength = len(Key)
-            Token = tokenFind(Set, Delimiter, Key, Flags)
+            Token = tokenFind(Set, Delimiter, TokenID, Flags)
+            if Token > 0:
+                """Get KeyLength to indicate Key Search..."""
+                KeyLength = len(TokenID)
+                
+            else:
+                """This is a Normal Token Index..."""
+                Token = TokenID
             
-        else:
-            """This is a Normal Token Index..."""
-            Token = TokenID
-
         """Extract the Token Value..."""
-        if Count == 0 or Token == 0 or Token > Count:
+        if Token == 0 or Token > Count:
             """Can't retrieve what isn't there..."""
-            return ""
+            Value ""
         
         elif Token == 1:
             """Extract the First Token..."""
