@@ -466,18 +466,17 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
        simple means to perform a sorted insert..."""
     """ Insert is really nothing more than a Get and a Put..."""
     """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and TokenID in (int, str) \
-              and type(NewValue) == str and type(Flags) == int
 
-    if Success and type(TokenID) == int:
-        """Make sure it's a Positive Integer..."""
-        Success = TokenID >= 0
-    
-    if Success and tokenFlagGet(Flags,"NO_NULL_TOKENS"):
-        Success = len(NewValue) > 0
-    
-    if Success:
+    Count = tokenCount(Set, Delimiter)
+    NoNulls = tokenFlagGet("NO_NULL_TOKENS")
+
+    if type(NewValue) == str:
+        if NoNulls and len(NewValue) == 0:
+            return Set
+    else:
+        return Set
+
+    if Count > 0 and tokenIdValid(TokenID):
 
         """Initialize Local Variables..."""
         Token = 0
@@ -486,13 +485,13 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
 
         """Check Flags for Unique Requirement..."""
         if tokenFlagGet(Flags, "UNIQUE"):
-            if tokenFind(Set, Delimiter, NewValue, Flags) > 0:
+            if tokenFound(Set, Delimiter, NewValue, Flags):
                 """Return the Unchanged Set..."""
                 return Set
             
         """Sort is implemented in the Insert Function..."""
         Sorted = tokenFlagGet(Flags, "SORTED")
-            
+        
         """Check to see if this is a Key or Index Operation..."""        
         if type(TokenID) == str:
             """This is a Keyed or Named TokenSet..."""
@@ -505,13 +504,15 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
             NewToken = NewValue
             """ The Zero Index is the SORTED or NULL Index..."""
             Sorted = Sorted or Token == 0
+
+        if Token > Count:
+            return Set
         
         if Sorted:
             """ This is a Special Sorted Insert..."""
             
-            Count = tokenCount(Set, Delimiter)
-            InsertHere = False
             Descending = tokenFlagGet(Flags, "DESCENDING")
+            InsertHere = False
 
             for Item in range(Count):
 
