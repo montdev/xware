@@ -402,11 +402,10 @@ def tokenDrop(Set, Delimiter, TokenID, Flags = 0):
     """Remove the Indicated Token"""
     """Validate parameters..."""
     
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and tokenIdValid(TokenID) \
-              and type(Flags) == int
-    
-    if Success:
+    """Determine the Count..."""
+    Count = tokenCount(Set, Delimiter)
+        
+    if Count > 0 and tokenIdValid(TokenID):
         
         """Initialize Local Variables..."""
         Token = Head = Tail = 0
@@ -428,11 +427,8 @@ def tokenDrop(Set, Delimiter, TokenID, Flags = 0):
         else:
             Token = TokenID
         
-        """Determine the Count..."""
-        Count = tokenCount(Set, Delimiter)
-        
         """Delete the indicated Token..."""
-        if Count == 0 or Token == 0 or Token > Count:
+        if Token == 0 or Token > Count:
             """Can't delete what isn't there..."""
             return Set
         
