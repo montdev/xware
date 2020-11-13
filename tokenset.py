@@ -570,12 +570,10 @@ def tokenInsert(Set, Delimiter, TokenID, NewValue, Flags = 0):
 def tokenOrder(Set, Delimiter, Flags = 0):
     """Sort the current Set..."""
     """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and type(Flags) == int
-    
-    if Success:
-        """Initialize Local Variables..."""
-        Count = tokenCount(Set, Delimiter)
+
+    Count = tokenCount(Set, Delimiter)
+
+    if Count > 0:
 
         if tokenFlagGet(Flags, "SORTED"):
             Order = "SORTED"
