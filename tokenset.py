@@ -669,13 +669,11 @@ def tokenFound(Set, Delimiter, Key, Flags = 0):
 def tokenFilter(Set, Delimiter, Key, Flags = 0):
     """Return a Key Filtered Subset..."""
 
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and tokenIdValid(Key, str) \
-              and type(Flags) == int
+    Count = tokenCount(Set, Delimiter)
 
     Filter = ""
     
-    if Success:
+    if Count > 0 and tokenIdValid(Key, str):
 
         """Check for Flags that affect this Operation..."""
         ContainedIn = tokenFlagGet(Flags, "CONTAINED_IN")
@@ -685,8 +683,6 @@ def tokenFilter(Set, Delimiter, Key, Flags = 0):
             Key = Key.upper()
             
         KeyLength = len(Key)
-
-        Count = tokenCount(Set, Delimiter)
 
         for Index in range(Count):
             """ Check to see if this is the Token..."""
@@ -699,19 +695,18 @@ def tokenFilter(Set, Delimiter, Key, Flags = 0):
             else:
                 TokenTest = Token.upper()
 
-            Match = False
+            KeyMatch = False
             
             if ContainedIn:
                 if TokenTest.Find(Key) >= 0:
-                    Match = True
+                    KeyMatch = True
             else:
                 if Key == TokenTest[:KeyLength]:
-                    Match = True
+                    KeyMatch = True
                 
-            if Match:
+            if KeyMatch:
                 """Add the unmodified Token..."""
                 Filter = tokenAdd(Filter, Delimiter, Token, Flags)
-
 
     return Filter
 
