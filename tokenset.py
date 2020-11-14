@@ -711,14 +711,6 @@ def tokenFilter(Set, Delimiter, Key, Flags = 0):
     return Filter
 
 # ============================================================
-# tokenIsKey(Set, Delimiter, Key, Flags = 0)
-# ============================================================
-def tokenIsKey(Set, Delimiter, Key, Flags = 0):
-    """Test to see if a Key Value can be found..."""
-    Token = tokenFind(Set, Delimiter, Key, Flags)
-    return bool(Token)
-
-# ============================================================
 # tokenGetKey(Set, Delimiter, Index, Terminator, Flags = 0)
 # ============================================================
 def tokenGetKey(Set, Delimiter, Index, Terminator, Flags = 0):
@@ -741,15 +733,12 @@ def tokenGetKey(Set, Delimiter, Index, Terminator, Flags = 0):
 # ============================================================
 def tokenSetCount(Set, Delimiter, Size, Flags = 0):
     """Change the Size of the TokenSet..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-              and len(Delimiter) > 0 and type(Size) == int \
-              and Size >= 0
+    
+    """Initialize Local Variables..."""
+    Count = tokenCount(Set, Delimiter)
 
-    if Success:
+    if Count >= 0 and Size >= 0:
         
-        """Initialize Local Variables..."""
-        Count = tokenCount(Set, Delimiter)
-
         """Prevent Operations resulting in Null Tokens..."""        
         NoNulls = tokenFlagGet(Flags, "NO_NULL_TOKENS")
 
