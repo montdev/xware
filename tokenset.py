@@ -615,19 +615,17 @@ def tokenOrder(Set, Delimiter, Flags = 0):
 # ============================================================
 def tokenFind(Set, Delimiter, Key, Flags = 0):
     """Locate the Token that begins with String..."""
-    """Validate parameters..."""
-    Success = type(Set) == str and type(Delimiter) == str \
-             and len(Delimiter) > 0 and tokenIdValid(Key, str) \
-             and type(Flags) == int
+
+    Count = tokenCount(Set, Delimiter)
     
-    if Success:
+    if Count > 0 and tokenIdValid(Key, str):
+
         """Check for Flags Affecting this Operation..."""
         ContainedIn = tokenFlagGet(Flags, "CONTAINED_IN")
         CaseSensitive = tokenFlagGet(Flags, "CASE_SENSITIVE")
+
         if CaseSensitive == False:
             Key = Key.upper()
-        
-        Count = tokenCount(Set, Delimiter)
         
         KeyLength = len(Key)
 
@@ -640,14 +638,18 @@ def tokenFind(Set, Delimiter, Key, Flags = 0):
             if CaseSensitive == False:
                 Token = Token.upper()
 
-            """If ContainedIn is in play then it can be anywhere..."""
+            KeyMatch = False
+            
             if ContainedIn:
-                if Token.Find(Key) >= 0:
-                    return Index + 1
+                """KeyMatch can be anywhere in the Token..."""
+                KeyMatch = Token.Find(Key) >= 0
+                
             else:
-                """If ContainedIn isn't in play then it's the Key at the Front..."""
-                if Key == Token[:KeyLength]:
-                    return Index + 1
+                """KeyMatch is the Key at the Front..."""
+                KeyMatch = Key == Token[:KeyLength]
+
+            if KeyMatch:
+                return Index + 1
 
     """Default Return..."""
     return 0
